@@ -89,9 +89,57 @@ classes provided in this project `./target/ide-${project.artifactId}-${project.v
 3. Add environment variable `spark.session.config.setJars.m2=true`, this will add add Jars from maven classpath and IDE jar
 to the spark context so that spark executors have access to the necessary code and dependencies. 
 
-###Figure 1
+### Figure 1
 
 ![alt text](README.md.resources/intellij-run-dialog.png)
+
+# Performance results from a  single host machine
+## It appears that there are no noticeable performance improvements on a single host machine between running 2, 3, or 4 cores regression 
+
+|Operations | Input rows|Input columns|Cores Used|SUM of Minutes|SUM of Seconds|SUM of RowsPersecond|
+|:---|---:|---:|---:|---:|---:|---:|
+|Count|1,000,000|1,000|2|12|745|1,342|
+|Count| | |3|11|681|1,468|
+|Count| | |4|10|633|1,580|
+|Count| |100|2|0|57|17,544|
+|Count| | |3|0|53|18,868|
+|Count| | |4|0|55|18,182|
+|Count|100,000|1,000|2|1|89|1,124|
+|Count| | |3|1|102|980|
+|Count| | |4|1|87|1,149|
+|Count| |100|2|0|7|14,286|
+|Count| | |3|0|7|14,286|
+|Count| | |4|0|7|14,286|
+|Count| 10,000|100|2|0|1|10,000|
+|Count| | |3|0|2|5,000|
+|Count| | |4|0|1|10,000|
+|Count|1,000|100|2|0|1|1,000|
+|Count| | |3|0|1|1,000|
+|Count| | |4|0|1|1,000|
+|Count|100|100|2|0|4|25|
+|Count| | |3|0|3|33|
+|Count| | |4|0|3|33|
+|Save|1,000,000|1,000|2|17|1,021|979|
+|Save| | |3|14|880|1,136|
+|Save| | |4|13|816|1,225|
+|Save| |100|2|1|69|14,493|
+|Save| | |3|1|69|14,493|
+|Save| | |4|1|67|14,925|
+|Save|100,000|1,000|2|1|93|1,075|
+|Save| | |3|1|91|1,099|
+|Save| | |4|1|81|1,235|
+|Save| |100|2|0|7|14,286|
+|Save| | |3|0|6|16,667|
+|Save| | |4|0|7|14,286|
+|Save|10,000|100|2|0|2|5,000|
+|Save| | |3|0|2|5,000|
+|Save| | |4|0|2|5,000|
+|Save|1,000|100|2|0|0|1,000|
+|Save| | |3|0|0|1,000|
+|Save| | |4|0|0|1,000|
+|Save|100|100|2|0|1|100|
+|Save| | |3|0|1|100|
+|Save| | |4|0|1|100|
 
 # References
 * [Maven](https://spark.apache.org)
