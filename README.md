@@ -98,7 +98,8 @@ to the spark context so that spark executors have access to the necessary code a
 * It appears that performance increases with number of cores but does not exactly double when doubling cores
 * Another observation is that it appears that most of the processing cost is JSON parsing, need to look at optimizing further
 Example: A file with 1m rows can be counted with out parsing in under 30 seconds however with parsing it takes longer than 10 minutes
-* Results can be found here [Google Sheet with results here](https://docs.google.com/spreadsheets/d/1rT22cXdM3pVAIEyy-oArSACXeq6O7MKxk-B1ycnBjFo/edit?usp=sharing)
+* Summary No Yarn: ![alt](./README.md.resources/performance-results-no-yarn.png)
+* Full Results can be found here [Google Sheet with results here](https://docs.google.com/spreadsheets/d/1rT22cXdM3pVAIEyy-oArSACXeq6O7MKxk-B1ycnBjFo/edit?usp=sharing)
   * for definition of scenarios refer to [application.conf#scenarios section](./src/main/resources/application.conf) 
 
 # References
@@ -109,7 +110,6 @@ Example: A file with 1m rows can be counted with out parsing in under 30 seconds
 * [Apache Spark](https://spark.apache.org)
 
 # TODO
-* add read & count parquet stats
 * run local yarn and capture status
 * add instructions for local yarn
   * pom.xml hadoop dir conf and yarn start stop & config
