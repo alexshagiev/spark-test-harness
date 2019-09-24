@@ -60,7 +60,7 @@ install maven as well as anaconda and create environment using provided recipe.
 * Initialize your bash profile to recognize conda - `conda init bash` and restart your terminal
 * Activate conda environment you had created in a prior step - `conda activate test-harness`
 * Run maven goal - `mvn exec:exec@generate-test-harness-files` - this will generate random data samples based on the 
-scenarios defined in [application.conf scenarios/run section](./src/main/resources/application.conf)
+scenarios defined in [application.conf#scenarios/run section](./src/main/resources/application.conf)
 * You should be able to see new data files created here [hdfs://localhost:9000/user/test-harness/data/l0](http://localhost:9870/explorer.html#/user/test-harness/data/l0/jsonl)
 
 # Spark Install & Starting Stand Alone Service
@@ -93,53 +93,13 @@ to the spark context so that spark executors have access to the necessary code a
 
 ![alt text](README.md.resources/intellij-run-dialog.png)
 
-# Performance results from a  single host machine
-## It appears that there are no noticeable performance improvements on a single host machine between running 2, 3, or 4 cores regression 
-
-|Operations | Input rows|Input columns|Cores Used|SUM of Minutes|SUM of Seconds|SUM of RowsPersecond|
-|:---|---:|---:|---:|---:|---:|---:|
-|Count|1,000,000|1,000|2|12|745|1,342|
-|Count| | |3|11|681|1,468|
-|Count| | |4|10|633|1,580|
-|Count| |100|2|0|57|17,544|
-|Count| | |3|0|53|18,868|
-|Count| | |4|0|55|18,182|
-|Count|100,000|1,000|2|1|89|1,124|
-|Count| | |3|1|102|980|
-|Count| | |4|1|87|1,149|
-|Count| |100|2|0|7|14,286|
-|Count| | |3|0|7|14,286|
-|Count| | |4|0|7|14,286|
-|Count| 10,000|100|2|0|1|10,000|
-|Count| | |3|0|2|5,000|
-|Count| | |4|0|1|10,000|
-|Count|1,000|100|2|0|1|1,000|
-|Count| | |3|0|1|1,000|
-|Count| | |4|0|1|1,000|
-|Count|100|100|2|0|4|25|
-|Count| | |3|0|3|33|
-|Count| | |4|0|3|33|
-|Save|1,000,000|1,000|2|17|1,021|979|
-|Save| | |3|14|880|1,136|
-|Save| | |4|13|816|1,225|
-|Save| |100|2|1|69|14,493|
-|Save| | |3|1|69|14,493|
-|Save| | |4|1|67|14,925|
-|Save|100,000|1,000|2|1|93|1,075|
-|Save| | |3|1|91|1,099|
-|Save| | |4|1|81|1,235|
-|Save| |100|2|0|7|14,286|
-|Save| | |3|0|6|16,667|
-|Save| | |4|0|7|14,286|
-|Save|10,000|100|2|0|2|5,000|
-|Save| | |3|0|2|5,000|
-|Save| | |4|0|2|5,000|
-|Save|1,000|100|2|0|0|1,000|
-|Save| | |3|0|0|1,000|
-|Save| | |4|0|0|1,000|
-|Save|100|100|2|0|1|100|
-|Save| | |3|0|1|100|
-|Save| | |4|0|1|100|
+# Performance results
+## Single Host deployment without yarn
+* It appears that performance increases with number of cores but does not exactly double when doubling cores
+* Another observation is that it appears that most of the processing cost is JSON parsing, need to look at optimizing further
+Example: A file with 1m rows can be counted with out parsing in under 30 seconds however with parsing it takes longer than 10 minutes
+* Results can be found here [Google Sheet with results here](https://docs.google.com/spreadsheets/d/1rT22cXdM3pVAIEyy-oArSACXeq6O7MKxk-B1ycnBjFo/edit?usp=sharing)
+  * for definition of scenarios refer to [application.conf#scenarios section](./src/main/resources/application.conf) 
 
 # References
 * [Maven](https://spark.apache.org)
@@ -147,3 +107,10 @@ to the spark context so that spark executors have access to the necessary code a
 * [Brew](https://brew.sh)
 * [Hadoop](https://hadoop.apache.org)
 * [Apache Spark](https://spark.apache.org)
+
+# TODO
+* add read & count parquet stats
+* run local yarn and capture status
+* add instructions for local yarn
+  * pom.xml hadoop dir conf and yarn start stop & config
+* add instructions amazon emr hadop dir seems to be at /etc/hadoop/conf.empty/ (yarn-site.xml,etc,etc)

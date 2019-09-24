@@ -1,6 +1,7 @@
 package com.alex.shagiev.spark
 
 import com.alex.shagiev.jsonl.JsonlDfParser
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SaveMode
 import org.jboss.netty.handler.codec.spdy.DefaultSpdyDataFrame
 
@@ -33,19 +34,28 @@ object Main extends EnvContext {
         val l1FullPath = s"${this.hdfsUrl}/${outputDir}/${inputFile}"
 
         var jsonlDF: org.apache.spark.sql.DataFrame = null
+        var linesRDD: RDD[String] = null
         val dInit = timer {
-          val linesRDD = sc.textFile(l0FullPath)
+          linesRDD = sc.textFile(l0FullPath)
           val headerLine = linesRDD.first()
           val metaData = JsonlDfParser.parseDfMetaData(headerLine)
           val rowsRDD = linesRDD.filter(!_.contains(headerLine)).map(JsonlDfParser.parseDfRow(_, metaData))
           jsonlDF = spark.createDataFrame(rowsRDD, JsonlDfParser.meta2SparkSchema(metaData))
         }
-        logger.info(s"Init,\t ${dInit.toMinutes}min,\t ${dInit.toSeconds}sec,\t ${dInit.toMillis}ms,\t spark.cores.max=${sparkCoresMax},\t ${l0FullPath}")
-        val dCount = timer{jsonlDF.count()}
-        logger.info(s"Count,\t ${dCount.toMinutes}min,\t ${dCount.toSeconds}sec,\t ${dCount.toMillis}ms,\t spark.cores.max=${sparkCoresMax},\t ${l0FullPath}")
+        logger.info(s"Init,(scenario.min.sec.ms.cores.file),${run_type}.${run_size},${dInit.toMinutes},${dInit.toSeconds},${dInit.toMillis},${sparkCoresMax},${l0FullPath}")
+        val dLinesCount = timer{linesRDD.count()}
+        logger.info(s"Count-Lines,(scenario.min.sec.ms.cores.file),${run_type}.${run_size},${dLinesCount.toMinutes},${dLinesCount.toSeconds},${dLinesCount.toMillis},${sparkCoresMax},${l0FullPath}")
+
+        val dParsedCount = timer{jsonlDF.count()}
+        logger.info(s"Count-Parsed,(scenario.min.sec.ms.cores.file),${run_type}.${run_size},${dParsedCount.toMinutes},${dParsedCount.toSeconds},${dParsedCount.toMillis},${sparkCoresMax},${l0FullPath}")
+
         val dSave = timer{jsonlDF.write.mode(SaveMode.Overwrite).save(l1FullPath)}
-        logger.info(s"Save,\t ${dSave.toMinutes}min,\t ${dSave.toSeconds}sec,\t ${dSave.toMillis}ms,\t spark.cores.max=${sparkCoresMax},\t ${l1FullPath}"
+        logger.info(s"Save-Parsed,(scenario.min.sec.ms.cores.file),${run_type}.${run_size},${dSave.toMinutes},${dSave.toSeconds},${dSave.toMillis},${sparkCoresMax},${l1FullPath}"
         )
+
+        val dParqueCount = timer{val parqDF = spark.read.parquet(l1FullPath); parqDF.count()}
+        logger.info(s"Count-Parquet,(scenario.min.sec.ms.cores.file),${run_type}.${run_size},${dParqueCount.toMinutes},${dParqueCount.toSeconds},${dParqueCount.toMillis},${sparkCoresMax},${l1FullPath}")
+
       }
 
     }
