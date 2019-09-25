@@ -81,7 +81,7 @@ object Main extends EnvContext {
 
         import spark.implicits._
         resultDF = performanceIndicators.toDF()
-        resultDF.show()
+        resultDF.show(10*100)
       }
 
     }
