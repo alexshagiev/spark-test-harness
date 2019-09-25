@@ -85,7 +85,7 @@ object Main extends EnvContext {
       }
 
     }
-    resultDF.write.format("csv").option("header", "true").mode(SaveMode.Append).save(s"${this.hdfsUrl}/${baseDir}/performance-stats.csv");
+    resultDF.coalesce(1).write.format("csv").option("header", "true").mode(SaveMode.Append).save(s"${this.hdfsUrl}/${baseDir}/performance-stats.csv");
   }
 
 }
