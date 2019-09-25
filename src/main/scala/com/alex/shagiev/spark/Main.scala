@@ -1,11 +1,18 @@
 package com.alex.shagiev.spark
 
+import java.sql.Date
+import java.util.UUID
+
 import com.alex.shagiev.jsonl.JsonlDfParser
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.SaveMode
+import org.apache.spark.sql.{DataFrame, SQLContext, SaveMode}
 import org.jboss.netty.handler.codec.spdy.DefaultSpdyDataFrame
 
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration._
+
+
+case class TestHarnessReport(runId: String, date: Date, timedUnit: String, run_type: String, run_size: String, min: Long, sec: Long, mil: Long, sparkCoreMax: String, master: String, path: String)
 
 object Main extends EnvContext {
   def timer[R](block: => R) = {
@@ -13,52 +20,72 @@ object Main extends EnvContext {
     val result = block    // call-by-name
     val t1 = System.nanoTime()
     Duration(t1 - t0,NANOSECONDS)
-//    return (result, elapsedMs)
-//    elapsedMs
   }
 
   def main(args: Array[String]): Unit = {
 
 
-    val sc = this.spark.sparkContext
+    val sc = spark.sparkContext
     sc.getConf.getAll.foreach(s=>logger.info(s"Spark Configuration - ${s}"))
-    val sparkCoresMax = sc.getConf.get("spark.cores.max","MAX")
+    val sparkCoresMax = sc.getConf.get("spark.cores.max","NOT_SET")
+    val master = sc.getConf.get("spark.master")
+
+    var performanceIndicators = ListBuffer[TestHarnessReport]()
+    val randomUUID = UUID.randomUUID().toString
+    val currentDate = new Date(new java.util.Date().getTime)
+    var resultDF: DataFrame = null
+    var baseDir = conf.getString(s"conf.hdfs.base-dir")
 
     for ( (run_type,run_sizes) <- this.run_types_2_sizes) {
 
       for( run_size <- this.toList(run_sizes)){
-        var inputFile = this.conf.getString(s"scenarios.${run_type}.${run_size}.name")
-        var inputDir = this.conf.getString(s"scenarios.${run_type}.l0-dir")
-        var outputDir = this.conf.getString(s"scenarios.${run_type}.l1-dir")
-        val l0FullPath = s"${this.hdfsUrl}/${inputDir}/${inputFile}"
-        val l1FullPath = s"${this.hdfsUrl}/${outputDir}/${inputFile}"
+        var inputFile = conf.getString(s"scenarios.${run_type}.${run_size}.name")
+        var inputDir = conf.getString(s"scenarios.${run_type}.l0-dir")
+        var outputDir = conf.getString(s"scenarios.${run_type}.l1-dir")
+        val l0FullPath = s"${hdfsUrl}/${inputDir}/${inputFile}"
+        val l1FullPath = s"${hdfsUrl}/${outputDir}/${inputFile}"
 
         var jsonlDF: org.apache.spark.sql.DataFrame = null
         var linesRDD: RDD[String] = null
-        val dInit = timer {
+        var timed = timer {
           linesRDD = sc.textFile(l0FullPath)
           val headerLine = linesRDD.first()
           val metaData = JsonlDfParser.parseDfMetaData(headerLine)
           val rowsRDD = linesRDD.filter(!_.contains(headerLine)).map(JsonlDfParser.parseDfRow(_, metaData))
           jsonlDF = spark.createDataFrame(rowsRDD, JsonlDfParser.meta2SparkSchema(metaData))
         }
-        logger.info(s"Init,(scenario.min.sec.ms.cores.file),${run_type}.${run_size},${dInit.toMinutes},${dInit.toSeconds},${dInit.toMillis},${sparkCoresMax},${l0FullPath}")
-        val dLinesCount = timer{linesRDD.count()}
-        logger.info(s"Count-Lines,(scenario.min.sec.ms.cores.file),${run_type}.${run_size},${dLinesCount.toMinutes},${dLinesCount.toSeconds},${dLinesCount.toMillis},${sparkCoresMax},${l0FullPath}")
+        var reportEntry = TestHarnessReport(randomUUID, currentDate, "Init", run_type, run_size.toString, timed.toMinutes, timed.toSeconds,timed.toMillis,sparkCoresMax,master,l0FullPath)
+        logger.info(reportEntry)
+        performanceIndicators += reportEntry
 
-        val dParsedCount = timer{jsonlDF.count()}
-        logger.info(s"Count-Parsed,(scenario.min.sec.ms.cores.file),${run_type}.${run_size},${dParsedCount.toMinutes},${dParsedCount.toSeconds},${dParsedCount.toMillis},${sparkCoresMax},${l0FullPath}")
+        timed = timer{linesRDD.count()}
+        reportEntry = TestHarnessReport(randomUUID, currentDate, "Raw Text Lines", run_type, run_size.toString, timed.toMinutes, timed.toSeconds,timed.toMillis,sparkCoresMax,master, l0FullPath)
+        logger.info(reportEntry)
+        performanceIndicators += reportEntry
 
-        val dSave = timer{jsonlDF.write.mode(SaveMode.Overwrite).save(l1FullPath)}
-        logger.info(s"Save-Parsed,(scenario.min.sec.ms.cores.file),${run_type}.${run_size},${dSave.toMinutes},${dSave.toSeconds},${dSave.toMillis},${sparkCoresMax},${l1FullPath}"
-        )
+        timed  = timer{jsonlDF.count()}
+        reportEntry = TestHarnessReport(randomUUID, currentDate, "Parsed DF Rows", run_type, run_size.toString, timed.toMinutes, timed.toSeconds,timed.toMillis,sparkCoresMax, master,l0FullPath)
+        logger.info(reportEntry)
+        performanceIndicators += reportEntry
 
-        val dParqueCount = timer{val parqDF = spark.read.parquet(l1FullPath); parqDF.count()}
-        logger.info(s"Count-Parquet,(scenario.min.sec.ms.cores.file),${run_type}.${run_size},${dParqueCount.toMinutes},${dParqueCount.toSeconds},${dParqueCount.toMillis},${sparkCoresMax},${l1FullPath}")
+        timed = timer{jsonlDF.write.mode(SaveMode.Overwrite).save(l1FullPath)}
+        reportEntry = TestHarnessReport(randomUUID, currentDate, "Save DF Parquet", run_type, run_size.toString, timed.toMinutes, timed.toSeconds,timed.toMillis,sparkCoresMax, master,l1FullPath)
+        logger.info(reportEntry)
+        performanceIndicators += reportEntry
 
+
+        timed = timer{val parqDF = spark.read.parquet(l1FullPath); parqDF.count()}
+        reportEntry = TestHarnessReport(randomUUID, currentDate, "Read Parquet DF/Count", run_type, run_size.toString, timed.toMinutes, timed.toSeconds,timed.toMillis,sparkCoresMax,master, l1FullPath)
+        logger.info(reportEntry)
+        performanceIndicators += reportEntry
+
+        import spark.implicits._
+        resultDF = performanceIndicators.toDF()
+        resultDF.show()
       }
 
     }
+    resultDF.write.format("csv").option("header", "true").mode(SaveMode.Append).save(s"${this.hdfsUrl}/${baseDir}/performance-stats.csv");
   }
 
 }

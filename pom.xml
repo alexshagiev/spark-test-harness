@@ -5,13 +5,7 @@
     <artifactId>spark-test-harness</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>${project.artifactId}</name>
-    <description>Example Scala Spark App - Maven build
-        This POM has two exec goals: -
-        exec:exec@run-local - Run the code in spark local mode.
-        exec:exec@run-yarn - Run the code on yarn cluster in client mode. For this to work core-site.xml and
-        yarn-site.xml
-        must exist in the main/resources directory and point to a valid cluster.
-    </description>
+    <description>.</description>
     <inceptionYear>2019</inceptionYear>
     <repositories>
         <repository>
@@ -27,9 +21,9 @@
         <spark.version>2.4.3</spark.version>
         <scala.version>2.11.12</scala.version>
         <scala.compat.version>2.11</scala.compat.version>
-        <hadoop.config.dir>/usr/local/Cellar/hadoop/3.1.2/libexec/etc/hadoop</hadoop.config.dir>
-<!--        AWS EMR config directory -->
-<!--        <hadoop.config.dir>/etc/hadoop/conf.empty</hadoop.config.dir>-->
+<!--    Toggle appropriate Config director between AWS and Local install -->
+        <hadoop.config.dir>/usr/local/Cellar/hadoop/3.1.2/libexec/etc/hadoop</hadoop.config.dir> <!-- Local hadoop/yarn config dir -->
+<!--        <hadoop.config.dir>/etc/hadoop/conf.empty</hadoop.config.dir> &lt;!&ndash; AWS EMR config dir &ndash;&gt;-->
 
 
     </properties>
@@ -89,30 +83,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    <profiles>
-        <profile>
-            <id>cores-defined</id>
-            <activation>
-                <property>
-                    <name>env.spark.cores.max</name>
-                </property>
-            </activation>
-            <properties>
-                <spark.cores.max>${env.spark.cores.max}</spark.cores.max>
-            </properties>
-        </profile>
-        <profile>
-            <id>cores-undefined</id>
-            <activation>
-                <property>
-                    <name>!env.spark.cores.max</name>
-                </property>
-            </activation>
-            <properties>
-                <spark.cores.max>1024</spark.cores.max>
-            </properties>
-        </profile>
-    </profiles>
     <build>
         <sourceDirectory>src/main/scala</sourceDirectory>
         <testSourceDirectory>src/test/scala</testSourceDirectory>
@@ -190,7 +160,7 @@
                 <version>1.5.0</version>
                 <executions>
                     <execution>
-                        <id>generate-test-harness-files</id>
+                        <id>generate-data</id>
                         <goals><goal>exec</goal></goals>
                         <configuration>
                             <executable>python</executable>
@@ -204,21 +174,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>generate-ide-jar</id>
-                        <goals><goal>exec</goal></goals>
-                        <configuration>
-                            <executable>jar</executable>
-                            <arguments>
-                                <argument>cvf</argument>
-                                <argument>${project.build.directory}/ide-${project.artifactId}-${project.version}.jar</argument>
-                                <argument>-C</argument>
-                                <argument>${project.build.outputDirectory}</argument>
-                                <argument>.</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>run-stand-alone</id>
+                        <id>run-test-yarn-master</id>
                         <goals>
                             <goal>exec</goal>
                         </goals>
@@ -230,7 +186,23 @@
                             </environmentVariables>
                             <executable>spark-submit</executable>
                             <arguments>
-                                <argument>--conf</argument><argument>spark.cores.max=${spark.cores.max}</argument>
+                                <argument>--master</argument><argument>yarn</argument>
+                                <argument>--conf</argument><argument>spark.driver.extraJavaOptions=-Dlog4j.configuration=file:${project.build.sourceDirectory}/../resources/log4j.properties</argument>
+                                <argument>${project.build.directory}/${project.artifactId}-${project.version}.jar</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>run-test-spark-master</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>spark-submit</executable>
+                            <arguments>
+                                <argument>--master</argument><argument>spark://localhost:7077</argument>
+<!--                                enable this option to control max cores in stand alone spark mode-->
+<!--                                <argument>&#45;&#45;conf</argument><argument>spark.cores.max=2</argument>-->
                                 <argument>--conf</argument><argument>spark.driver.extraJavaOptions=-Dlog4j.configuration=file:${project.build.sourceDirectory}/../resources/log4j.properties</argument>
                                 <argument>${project.build.directory}/${project.artifactId}-${project.version}.jar</argument>
                             </arguments>

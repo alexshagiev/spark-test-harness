@@ -52,40 +52,23 @@ trait EnvContext extends Logging{
    * -Dspark.master="local[*]"
    */
   private def getSparkSession: SparkSession = {
-    def getMavenClasspath: Array[String] = {
-//      TODO see if session creation can be shared with Local run
-//      TODO see if it can be detected when running inside IDE and therefore only then add .m2 path
-      val cl = ClassLoader.getSystemClassLoader.asInstanceOf[URLClassLoader]
 
-      val m2classpath = cl.getURLs.filter(p => (
-          p.toString.contains(".m2/") || p.toString.contains("ide-")
-        ))
-      return m2classpath.map(u => u.toString)
+    def get_D_Master():Option[String]={
+      sys.env.get("master")
     }
-    def isOnsparkContextAddMavenJars()={
-        sys.env.getOrElse("spark.session.config.setJars.m2","False").toBoolean
-    }
-
 
     val sparkSession = SparkSession.builder
       .appName(conf.getString(s"${configRoot}.spark.appname"))
-      .master(conf.getString(s"${configRoot}.spark.master"))
 
-    if (isOnsparkContextAddMavenJars()) {
-      logger.warn("*"*100)
-      logger.warn("Spark Envionment class detected IDE environment like IntelliJ/Eclipse. SparkEnv will automatically add IDE maven Jars to classpath of SPARK Context")
-      logger.warn("*"*100)
-      var jars = Seq[String]()
-      jars = getMavenClasspath.toSeq
-      jars.foreach(s=>logger.warn(s"Running in IDE mode - don't forget to include a maven exec:exec@run-ide goal after build - Adding Jar: ${s}"))
-      sparkSession.config(new SparkConf().setJars(jars))
+    var sparkConf = new SparkConf()
+
+    if (!get_D_Master().isEmpty){
+      sparkConf.setMaster(get_D_Master().get)
     }
-
-//      .config(new SparkConf().setJars(jars))
-
+    sparkSession.config(sparkConf)
 
 
-    return sparkSession.getOrCreate()
+   sparkSession.getOrCreate()
   }
 
 
