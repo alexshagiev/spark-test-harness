@@ -82,7 +82,7 @@ def get_random_column__name_2_types(column_num: int):
     column_name_2_type = OrderedDict()
     # fix first column to be biz date
     column_name_2_type['biz_date'] = Type.Date
-    for i in range(column_num):
+    for i in range(column_num - 1):
         type = Type(random.randint(1, Type.__len__() - 1))
         name = gen_random_name(i)
         # print('i={}- {}'.format(i, name))
