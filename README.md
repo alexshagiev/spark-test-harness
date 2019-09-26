@@ -1,5 +1,7 @@
 # Spark performance test harness
+
 ## Goal of this test harness
+
 * This program's aim is to measure spark performance on a number of operations and and typical use cases.
   * Parsing of JSONL Dataframe file. JSONL Dataframe file is a format designed to be human readable text while somewhat
   optimized for large data transfers over the network. It essentially includes exactly ONE meta data line that defines
@@ -12,16 +14,25 @@
     
 # Build/Run Environment setup
 ## Tested on Mac OS
-![alt_text](README.md.resources/macOS-version.png)
+  * Instructions below will using Homebrew [https://brew.sh/] if you don't already have it install it first.
+   
+    ![alt_text](README.md.resources/macOS-version.png)
+
 ***
 # HDFS Install & Starting Service
-## Install HDFS & Yarn- `brew install hadoop@3.1.2`
-  * This will install hadoop and hdfs service under `/usr/local/Cellar/hadoop/3.1.2`
-  * All further hadoop references will be relative to the hadoop install path above
-  * Change `hadoop.tmp.dir` in `libexec/etc/hadoop/core-default.xml` to be `~/hadoop-storage` otherwise the default `/tmp/hadoop-${user.name}` 
-location gets erased after reboot and hdfs gets corrupted and needs reformatting
-  * Enabled Pseudo-Distributed Operations mode. Summary below, more at [hadoop.apache.org](https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/SingleCluster.html#Pseudo-Distributed_Operation)
-    * Add below in `libexec/etc/hadoop/core-site.xml`
+
+## Install HDFS & Yarn
+  * `brew install hadoop`
+    * This will install hadoop that includes __HDFS__ and __YARN__ service under `/usr/local/Cellar/hadoop/3.1.2` which will
+    references as `${HADOOP_HOME}` further in instructions.
+  * Change property `hadoop.tmp.dir` to the following value `~/hadoop-storage`, in this file 
+    `${HADOOP_HOME}/libexec/etc/hadoop/core-default.xml`. The default value `/tmp/hadoop-${user.name}` results in a location
+    that gets erased after reboot and __HDFS__ gets corrupted after your computer restart.
+  * Enable HADOOP Pseudo-Distributed Operations mode. Summary is included below, for more details and options visit
+  [hadoop.apache.org](https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/SingleCluster.html#Pseudo-Distributed_Operation)    
+
+### Configuration Summary __HDFS__ & __YARN__
+  * Locate the file `${HADOOP_HOME}/libexec/etc/hadoop/core-site.xml` and add the following property
     ~~~xml
     <configuration>
         <property>
@@ -30,58 +41,173 @@ location gets erased after reboot and hdfs gets corrupted and needs reformatting
         </property>
     </configuration>
     ~~~
-    * Add below in `libexec/etc/hadoop/hdfs-site.xml`
+  * Locate file `${HADOOP_HOME}/libexec/etc/hadoop/hdfs-site.xml` and add the following property
     ~~~xml
     <configuration>
         <property>
             <name>dfs.replication</name>
             <value>1</value>
-        </property>
+        </property>    
     </configuration>
     ~~~
-    * Check that `ssh localhost` works if does not follow
+  * Ensure that `$ ssh localhost` has key based authentication if not follow steps below to enable.
     ~~~shell script
-    $ ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
-    $ cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-    $ chmod 0600 ~/.ssh/authorized_keys 
+    ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
+    cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+    chmod 0600 ~/.ssh/authorized_keys 
     ~~~
-    * Format file system - `bin/hdfs namenode -format`
-    
-## Start Hadoop file system 
-1. Run `libexec/sbin/start-dfs.sh`
-   * You should be able to see your HDFS file system here now - http://localhost:9870/
-   * Create Home directory where the data will be saved during performance testing `bin/hdfs dfs -mkdir -p /user/test-harness`
-   * To stop the service execute `libexec/sbin/stop-dfs.sh`
-2. Run `libexec/sbin/start-yarn.sh`
-   * You should be able to see the resource scheduler here now - http://localhost:8088
+  * Format __HDFS__ file system 
+    ~~~shell script
+    ${HADOOP_HOME}/libexec/bin/hdfs namenode -format
+    ~~~
+
+### Starting __HDFS__ file system, creating home directory for the harness & __YARN__ resource manager
+  * Start __HDFS__ & Format the disk
+    ~~~shell script
+    ${HADOOP_HOME}/libexec/sbin/start-dfs.sh
+    ${HADOOP_HOME}/libexec/bin/hdfs dfs -mkdir -p /user/test-harness
+    ${HADOOP_HOME}/libexec/sbin/start-yarn.sh
+    ~~~
+  * Above should start several services for which UI will be visible on the following default ports
+    * __HDFS__ - [http://localhost:9870/]
+    * __YARN__ - [http://localhost:8088/]
+  * To stop __HDFS__ & __YARN__ use the following scripts
+    ~~~shell script
+    ${HADOOP_HOME}/libexec/sbin/stop-dfs.sh
+    ${HADOOP_HOME}/libexec/sbin/stop-yarn.sh
+    ~~~
    
 ## Load HDFS with randomly generated data samples.
-* Scripts generating data samples are written in python can be executed using a maven gaol. Hence we recommend you 
-install maven as well as anaconda and create environment using provided recipe.
-* Install maven - `brew install mvn`
-* Install anaconda which will include python - `brew casks install anaconda`
-* Create a python environment which will install necessary hdfs and other libraries - `conda env create -f ./scenario-file-generator/conda.recipe/test-harness.yml`
-* Initialize your bash profile to recognize conda - `conda init bash` and restart your terminal
-* Activate conda environment you had created in a prior step - `conda activate test-harness`
-* Run maven goal - `mvn exec:exec@generate-data` - this will generate random data samples based on the 
-scenarios defined in [application.conf#scenarios/run section](./src/main/resources/application.conf)
-* You should be able to see new data files created here [hdfs://localhost:9000/user/test-harness/data/l0](http://localhost:9870/explorer.html#/user/test-harness/data/l0/jsonl)
-
+  * `brew install maven`
+    * Scripts generating data samples and writing them to __HDFS__ are written in python can be executed 
+    using a maven goal. Hence we recommend you install maven as well as anaconda and create environment 
+    using provided recipe.
+  * `brew casks install anaconda` followed by `conda init bash`
+    * Restart your shell terminal, after installing anaconda and initializing bash shell to recognize location of conda binaries 
+  * `conda env create -f ./scenario-file-generator/conda.recipe/test-harness.yml`
+    * you will need to run this command in the directory where you check out this test-harness project from [github.com]
+    This will create a python environment with necessary hdfs libraries to run data generator 
+  * `conda activate test-harness`
+    * Activate conda environment you had created. Data generator scrip needs to run in this specific __Conda__ environment
+  * `mvn exec:exec@generate-data`
+    * Run maven goal to populate __HDFS__ with data scenarios defined in [application.conf#scenarios/run section](./src/main/resources/application.conf)
+  * [http://localhost:9870/explorer.html#/user/test-harness/data/l0/jsonl](http://localhost:9870/explorer.html#/user/test-harness/data/l0/jsonl)
+    * You should be able to see the data being generated using File Browser in the link avove. 
 
 # Spark Install & Starting Stand Alone Service
-## Install Spark
-* Install - `brew install apache-spark@2.4.3`
-* This will install apache spark service under `/usr/local/Cellar/apache-spark/2.4.3/`
-* All further hadoop references will be relative to the hadoop install path above
-## Start Stand Alone Spark - `libexec/sbin/start-all.sh`
-* You should be able to see your cluster running here http://localhost:8080
-* Your default master url should be set to `spark://localhost:7077`
-* To stop the service execute `libexec/sbin/stop-all.sh`
 
-# Amazon Web Services & Elastic Map Reduce ( EMR )
-1. To run this test harness on EMR you need to open account on Amazon and create an Spark & Hadoop cluster.
-2. Once you created the cluster you will need to make a note of the `master-public-dns-name` name of your EMR
-3. Use ssh to login to the Master server and install maven, java8, anaconda, and follow instructions to below to run test harness and generate sample data
+## Spark Install & Starting the service
+
+### Install Spark
+  * `brew install apache-spark`
+    * This will install __Apache Spark__ service under `/usr/local/Cellar/apache-spark/2.4.3/` which will refer to as `${SPARK_HOME}` further in instructions.
+
+### Start Stand Alone Spark Cluster
+  * Start script
+  ~~~shell script
+  $ ${SPARK_HOME}/libexec/sbin/start-all.sh
+  ~~~
+  * Above should start a service for which UI will be visible on the following default ports
+    * __SPARK__ UI - [http://localhost:8080/]
+    * Default Spark master url to which `spark-submit` script will be submitting jobs should located at - [spark://localhost:7077](spark://localhost:7077)
+  * Stop script
+  ~~~shell script
+  $ ${SPARK_HOME}/libexec/sbin/stop-all.sh
+  ~~~
+
+# Amazon Web Services Elastic Compute ( EC2 ) & Elastic Map Reduce ( EMR )
+## Usefull References on AWS & EMR
+  * Product Info - [https://aws.amazon.com/emr/]
+  * Pricing - [https://aws.amazon.com/emr/pricing/]
+  * Good Getting Started Guide and explain of Free Tier - [https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-gs.html]
+  * This Link provides an overview of your account utilization and breaching free tier allowance - [https://console.aws.amazon.com/billing/home#/freetier]
+    * Links have more information about the product and pricing
+    
+## Setting up EMR Spark Cluster
+  * Create a key pair using EC2 console [https://console.aws.amazon.com/ec2/home?#KeyPairs] 
+    * Save the PEM key, you will need it later when connecting to the EMR via SSH
+    
+    ![alt_text](README.md.resources/aws-ec2-key-creating.png)
+  * Use Creating Cluster button here [https://console.aws.amazon.com/elasticmapreduce/]
+    * I turned off logging as it seems to cause excessive AWS S3 storage utilization and cost
+    * Remember to select the key you created in the prior step to be able to access your master node from public internet.
+    
+    ![alt_text](README.md.resources/aws-emr-cluster-settings.png)
+  * Make a note of your __Master Public DNS Name__, this is your entry point into EMR cluster from public internet. We will refer 
+  to it as `${MASTER_PUBLIC_DNS_NAME}`
+  
+    ![alt_text](README.md.resources/aws-erm-cluster-waiting.png) 
+  * Use key to login to you Master host `ssh -i ~/aws-emr-key.pem hadoop@${MASTER_PUBLIC_DNS_NAME}` 
+  * Execute the following script to configure environment for the test harness to run
+  ~~~shell script
+  # install git
+  sudo yum -y install git
+  
+  # install anaconda
+  rm -rf Anaconda2-2019.07-Linux-x86_64.sh
+  wget https://repo.continuum.io/archive/Anaconda2-2019.07-Linux-x86_64.sh
+  rm -rf ./anaconda2
+  bash Anaconda2-2019.07-Linux-x86_64.sh -b -p ./anaconda2
+  ./anaconda2/condabin/conda init bash
+  source .bashrc
+  
+  # install apache maven
+  sudo wget http://repos.fedorapeople.org/repos/dchen/apache-maven/epel-apache-maven.repo -O /etc/yum.repos.d/epel-apache-maven.repo
+  sudo sed -i s/\$releasever/6/g /etc/yum.repos.d/epel-apache-maven.repo
+  sudo yum install -y apache-maven
+  
+  # maven install with jdk 1.7 so fix env to point to jdk 1.8
+  sudo yum install java-1.8.0-devel
+  sudo /usr/sbin/alternatives --set java /usr/lib/jvm/java-1.8.0-openjdk.x86_64/bin/java
+  sudo /usr/sbin/alternatives --set javac /usr/lib/jvm/java-1.8.0-openjdk.x86_64/bin/javac
+  
+  # downloand test harness
+  rm -rf ./spark-test-harness
+  git clone https://github.com/alexshagiev/spark-test-harness.git
+  cd spark-test-harness
+  ~~~
+## Load HDFS with randomly generated data samples & Accessing Cluster UI services from your computer
+
+### Setup dynamic port forwarding for HDFS,Yarn,Spark UI access
+  * Install [FoxyProxy](https://chrome.google.com/webstore/detail/foxyproxy-standard/gcknhkkoolaabfmlnjonogaaifnjlfnp?hl=en) extension in your Chrome Browser
+    * Configure FoxyProxy as follows [Latest Proxy Settings & plugin instructions here here](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-connect-master-node-proxy.html)
+    ~~~xml
+    <?xml version="1.0" encoding="UTF-8"?>
+    <foxyproxy>
+       <proxies>
+          <proxy name="emr-socks-proxy" id="2322596116" notes="" fromSubscription="false" enabled="true" mode="manual" selectedTabIndex="2" lastresort="false" animatedIcons="true" includeInCycle="true" color="#0055E5" proxyDNS="true" noInternalIPs="false" autoconfMode="pac" clearCacheBeforeUse="false" disableCache="false" clearCookiesBeforeUse="false" rejectCookies="false">
+             <matches>
+                <match enabled="true" name="*ec2*.amazonaws.com*" pattern="*ec2*.amazonaws.com*" isRegEx="false" isBlackList="false" isMultiLine="false" caseSensitive="false" fromSubscription="false" />
+                <match enabled="true" name="*ec2*.compute*" pattern="*ec2*.compute*" isRegEx="false" isBlackList="false" isMultiLine="false" caseSensitive="false" fromSubscription="false" />
+                <match enabled="true" name="10.*" pattern="http://10.*" isRegEx="false" isBlackList="false" isMultiLine="false" caseSensitive="false" fromSubscription="false" />
+                <match enabled="true" name="*10*.amazonaws.com*" pattern="*10*.amazonaws.com*" isRegEx="false" isBlackList="false" isMultiLine="false" caseSensitive="false" fromSubscription="false" />
+                <match enabled="true" name="*10*.compute*" pattern="*10*.compute*" isRegEx="false" isBlackList="false" isMultiLine="false" caseSensitive="false" fromSubscription="false" /> 
+                <match enabled="true" name="*.compute.internal*" pattern="*.compute.internal*" isRegEx="false" isBlackList="false" isMultiLine="false" caseSensitive="false" fromSubscription="false"/>
+                <match enabled="true" name="*.ec2.internal* " pattern="*.ec2.internal*" isRegEx="false" isBlackList="false" isMultiLine="false" caseSensitive="false" fromSubscription="false"/>	  
+           </matches>
+             <manualconf host="localhost" port="8157" socksversion="5" isSocks="true" username="" password="" domain="" />
+          </proxy>
+       </proxies>
+    </foxyproxy>
+    ~~~
+  * Start a dynamic port proxy `ssh -i ~/aws-emr-key.pem -ND 8157 hadoop@${MASTER_PUBLIC_DNS_NAME}`
+  * The EMR Management console should now have the WebLinks under `Connections:` section enabled which will take you directly to the HDFS, SPARK, 
+  YARN UIs [https://console.aws.amazon.com/elasticmapreduce/]
+  
+  ![alt_text](README.md.resources/aws-erm-cluster-waiting.png) 
+
+### Load HDFS
+  * `conda env create -f ./scenario-file-generator/conda.recipe/test-harness.yml`
+  * you will need to run this command in the directory where you check out this test-harness project from [github.com]
+    This will create a python environment with necessary hdfs libraries to run data generator 
+  * `conda activate test-harness`
+    * Activate conda environment you had created. Data generator scrip needs to run in this specific __Conda__ environment
+  * `mvn exec:exec@generate-data`
+    * Run maven goal to populate __HDFS__ with data scenarios defined in [application.conf#scenarios/run section](./src/main/resources/application.conf)
+  * [http://localhost:9870/explorer.html#/user/test-harness/data/l0/jsonl](http://localhost:9870/explorer.html#/user/test-harness/data/l0/jsonl)
+    * You should be able to see the data being generated using File Browser in the link avove. 
+
+  
 4. Remember to adjust the following two files to match EMR settings
   * [pom.xml properites/hadoop.config.dir section](pom.xml)
   * [application.conf conf/hdfs/url section](src/main/resources/application.conf) - correct URL:PORT is available on the 
@@ -119,8 +245,4 @@ Example: A file with 1m rows can be counted with out parsing in under 30 seconds
 * [Apache Spark](https://spark.apache.org)
 
 # TODO
-* fix run stand alone to be consistent with yarn & local url
-* run local yarn and capture status
-* add instructions for local yarn
-  * pom.xml hadoop dir conf and yarn start stop & config
-* add instructions amazon emr hadop dir seems to be at /etc/hadoop/conf.empty/ (yarn-site.xml,etc,etc)
+* fix auto coorect of HDFS & YARN config on EMR
