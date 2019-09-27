@@ -14,7 +14,7 @@
     
 # Build/Run Environment setup
 ## Tested on Mac OS
-  * Instructions below will using Homebrew [https://brew.sh/] if you don't already have it install it first.
+  * Instructions below will using [Homebrew](https://brew.sh/) if you don't already have it install it first.
    
     ![alt_text](README.md.resources/macOS-version.png)
 
@@ -85,7 +85,7 @@
   * `brew casks install anaconda` followed by `conda init bash`
     * Restart your shell terminal, after installing anaconda and initializing bash shell to recognize location of conda binaries 
   * `conda env create -f ./scenario-file-generator/conda.recipe/test-harness.yml`
-    * you will need to run this command in the directory where you check out this test-harness project from [github.com]
+    * you will need to run this command in the directory where you check out this test-harness project from [GitHub](https://github.com/alexshagiev/spark-test-harness)
     This will create a python environment with necessary hdfs libraries to run data generator 
   * `conda activate test-harness`
     * Activate conda environment you had created. Data generator scrip needs to run in this specific __Conda__ environment
@@ -108,7 +108,7 @@
   $ ${SPARK_HOME}/libexec/sbin/start-all.sh
   ~~~
   * Above should start a service for which UI will be visible on the following default ports
-    * __SPARK__ UI - [http://localhost:8080/]
+    * __SPARK__ UI - http://localhost:8080/
     * Default Spark master url to which `spark-submit` script will be submitting jobs should located at - [spark://localhost:7077](spark://localhost:7077)
   * Stop script
   ~~~shell script
@@ -117,18 +117,17 @@
 
 # Amazon Web Services Elastic Compute ( EC2 ) & Elastic Map Reduce ( EMR )
 ## Usefull References on AWS & EMR
-  * Product Info - [https://aws.amazon.com/emr/]
-  * Pricing - [https://aws.amazon.com/emr/pricing/]
-  * Good Getting Started Guide and explain of Free Tier - [https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-gs.html]
-  * This Link provides an overview of your account utilization and breaching free tier allowance - [https://console.aws.amazon.com/billing/home#/freetier]
-    * Links have more information about the product and pricing
+  * [Product Info](https://aws.amazon.com/emr/)
+  * [Pricing](https://aws.amazon.com/emr/pricing/)
+  * [Getting Started and explain of Free Tier](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-gs.html)
+  * [Free tier allowance](https://console.aws.amazon.com/billing/home#/freetier)
     
 ## Setting up EMR Spark Cluster
-  * Create a key pair using EC2 console [https://console.aws.amazon.com/ec2/home?#KeyPairs] 
+  * [Create a key pair using EC2 console](https://console.aws.amazon.com/ec2/home?#KeyPairs) 
     * Save the PEM key, you will need it later when connecting to the EMR via SSH
     
     ![alt_text](README.md.resources/aws-ec2-key-creating.png)
-  * Use Creating Cluster button here [https://console.aws.amazon.com/elasticmapreduce/]
+  * [Use Create Cluster button](https://console.aws.amazon.com/elasticmapreduce/)
     * I turned off logging as it seems to cause excessive AWS S3 storage utilization and cost
     * Remember to select the key you created in the prior step to be able to access your master node from public internet.
     
@@ -191,8 +190,8 @@
     </foxyproxy>
     ~~~
   * Start a dynamic port proxy `ssh -i ~/aws-emr-key.pem -ND 8157 hadoop@${MASTER_PUBLIC_DNS_NAME}`
-  * The EMR Management console should now have the WebLinks under `Connections:` section enabled which will take you directly to the HDFS, SPARK, 
-  YARN UIs [https://console.aws.amazon.com/elasticmapreduce/]
+  * The EMR Management console should now have the WebLinks under `Connections:` section enabled which will take you directly to the 
+  [HDFS, SPARK, YARN UIs](https://console.aws.amazon.com/elasticmapreduce/)
   
   ![alt_text](README.md.resources/aws-erm-cluster-waiting.png) 
 
