@@ -105,14 +105,14 @@
 ### Start Stand Alone Spark Cluster
   * Start script
   ~~~shell script
-  $ ${SPARK_HOME}/libexec/sbin/start-all.sh
+  ${SPARK_HOME}/libexec/sbin/start-all.sh
   ~~~
   * Above should start a service for which UI will be visible on the following default ports
     * __SPARK__ UI - http://localhost:8080/
-    * Default Spark master url to which `spark-submit` script will be submitting jobs should located at - [spark://localhost:7077](spark://localhost:7077)
+    * Default Spark master url to which `spark-submit` script will be submitting jobs should located at - `spark://localhost:7077`
   * Stop script
   ~~~shell script
-  $ ${SPARK_HOME}/libexec/sbin/stop-all.sh
+  ${SPARK_HOME}/libexec/sbin/stop-all.sh
   ~~~
 
 # Amazon Web Services Elastic Compute ( EC2 ) & Elastic Map Reduce ( EMR )
