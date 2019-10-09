@@ -47,7 +47,7 @@ def get_aws_emr_public_master_dns_name_on_waiting(cluster_id: str, timeout: int,
     attempt = 0
     state = ''
     t_end = time.time() + timeout * 60 + 10  # attempt for 10 seconds longer than timeout to create an AWS EMR cluster
-    with tqdm(total=100) as pbar:
+    with tqdm(total=timeout * 60 + 10) as pbar:
         while time.time() < t_end:
             attempt += 1
             result = describe_cluster(cluster_id, attempt, local_test_mode)
@@ -60,12 +60,11 @@ def get_aws_emr_public_master_dns_name_on_waiting(cluster_id: str, timeout: int,
             pbar.set_description(
                 'Creating Cluster Timeout: {}min, Attempt: {}, State: {}, master_public_dns: {}'.format(
                     timeout, attempt, state, master_public_dns))
-            approx_complete_time_sec = 120
             sleep_interval_sec = 5
-            pbar.update(attempt / approx_complete_time_sec / sleep_interval_sec * 100 * 100)
+            pbar.update(sleep_interval_sec)
 
             if state == 'WAITING':
-                pbar.update(100)
+                logger.info('Cluster Details: {}'.format(result.replace('\n', '').replace('  ', '')))
                 return master_public_dns
 
             time.sleep(sleep_interval_sec)
@@ -104,7 +103,7 @@ def main(argv):
     #
     host_name = get_aws_emr_public_master_dns_name_on_waiting(cluster_id, timeout, local_test_mode)
     logger.info(host_name)
-    default_fs = 'hdfs://localhost:9000' if local_test_mode else 'hdfs://{}:{}'.format(host_name, '50070')
+    default_fs = 'hdfs://localhost:9000' if local_test_mode else 'hdfs://{}:{}'.format(host_name, '8020')
 
     generate_jsonl_data.main(
         [sys.argv[0], '-c', './../src/main/resources/application.conf', '-o', 'hdfs', '--default-fs', default_fs])
