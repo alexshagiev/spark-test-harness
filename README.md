@@ -204,7 +204,9 @@ AmazonElasticMapReduceFullAccess` role
  * Run `aws configure` on your aws EC2 micro node and assign KeyID & AccessKey from the new `emr-create-id`
  Identity for region use `us-east-2` other appropriate defaults. Make sure the output format is `json`
  * `aws emr create-cluster --release-label emr-5.26.0 --use-default-roles --applications Name=Spark Name=Hadoop --ec2-attributes KeyName=aws-emr-key --instance-fleets InstanceFleetType=MASTER,TargetSpotCapacity=1,InstanceTypeConfigs=['{InstanceType=m4.large}'] InstanceFleetType=CORE,TargetSpotCapacity=2,InstanceTypeConfigs=['{InstanceType=m4.large}'] --auto-terminate`
- 
+ * TODO cluster needs to be created with a security group that allows connection from the t2.micro by adding port 8020 to the inbound rules of the `ElasticMapReduce-master` security group
+ * ssh -i ~/aws-emr-key.pem hadoop@ec2-18-223-106-115.us-east-2.compute.amazonaws.com hdfs dfs -mkdir -p /user/test-harness - create test harness dir
+ * grant rwx permissions to all files ssh -i ~/aws-emr-key.pem hadoop@ec2-18-223-106-115.us-east-2.compute.amazonaws.com hdfs dfs -chmod -R 777 /user/test-harness
 
 # Load HDFS
   * `conda env create -f ./utils/conda.recipe/test-harness.yml`

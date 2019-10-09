@@ -74,6 +74,14 @@ def get_aws_emr_public_master_dns_name_on_waiting(cluster_id: str, timeout: int,
                                                                                                    timeout, state))
 
 
+def create_home_dir(host_name: str, dir_name: str) -> str:
+    cmd = 'ssh -i ~/aws-emr-key.pem hadoop@{} hdfs dfs -mkdir -p /user/{}'.format(host_name, dir_name)
+    logger.debug("exec: {}".format(cmd))
+    result = run([cmd], check=True, shell=True, universal_newlines=True, stdout=PIPE, stderr=PIPE)
+    cmd = 'ssh -i ~/aws-emr-key.pem hadoop@{} hdfs dfs -chmod -R 777 /user/{}'.format(host_name, dir_name)
+    return result.stdout
+
+
 def show_help():
     print(
         'generate_scenarios_aws_spot_cluster.py --spot-core-capacity 2 --hdfs-port                   # will use input stream')
@@ -104,6 +112,7 @@ def main(argv):
     host_name = get_aws_emr_public_master_dns_name_on_waiting(cluster_id, timeout, local_test_mode)
     logger.info(host_name)
     default_fs = 'hdfs://localhost:9000' if local_test_mode else 'hdfs://{}:{}'.format(host_name, '8020')
+    output = create_home_dir(host_name, 'test-harness')
 
     generate_jsonl_data.main(
         [sys.argv[0], '-c', './../src/main/resources/application.conf', '-o', 'hdfs', '--default-fs', default_fs])
