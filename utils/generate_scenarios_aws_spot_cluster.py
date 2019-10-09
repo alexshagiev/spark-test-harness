@@ -27,7 +27,7 @@ def create_cluster(timeout: int, cores: int, local_test_mode: bool) -> str:
     if result.returncode != 0:
         raise Exception(result.stderr)
 
-    cluster_id = json.loads(result)['ClusterId']
+    cluster_id = json.loads(result.stdout)['ClusterId']
     logger.info('ClusterId: {}, details: {}'.format(cluster_id, result.stdout.replace('\n', '').replace('  ', '')))
     return cluster_id
 
