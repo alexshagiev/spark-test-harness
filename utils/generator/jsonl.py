@@ -3,6 +3,7 @@ import random
 import string
 import logging
 import datetime
+import pyarrow as pa
 from collections import OrderedDict
 
 logger = logging.getLogger(__name__)
@@ -123,7 +124,7 @@ def jsonl_row(val: list, typ: list):
            ']}'
 
 
-def write(file, cols: int = 10, rows: int = 10, rows_uniqueness_factor: int = 1):
+def write(file: pa.HdfsFile, cols: int = 10, rows: int = 10, rows_uniqueness_factor: int = 1):
     # column_num = col
     # row_num = row
     # repeat = repeat
@@ -133,7 +134,7 @@ def write(file, cols: int = 10, rows: int = 10, rows_uniqueness_factor: int = 1)
 
     header = jsonl_header(name_2_type)
     # logger.info(header)
-    file.write(header + '\n')
+    file.write('{}\n'.format(header).encode())
     # generate random values for a rwo
     size = int(rows / rows_uniqueness_factor)
     for r in range(size):
@@ -148,4 +149,4 @@ def write(file, cols: int = 10, rows: int = 10, rows_uniqueness_factor: int = 1)
             logger.info('Generated Line # {:,} of {:,}'.format((r + 1) * rows_uniqueness_factor, rows))
         for i in range(rows_uniqueness_factor):
             content = '{}\n'.format(row_str)
-            file.write(content)
+            file.write(content.encode())

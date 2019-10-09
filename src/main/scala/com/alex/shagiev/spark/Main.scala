@@ -59,7 +59,7 @@ object Main extends EnvContext {
         performanceIndicators += reportEntry
 
         timed = timer{linesRDD.count()}
-        reportEntry = TestHarnessReport(randomUUID, currentDate, "Raw Text Lines", run_type, run_size.toString, timed.toMinutes, timed.toSeconds,timed.toMillis,sparkCoresMax,master, l0FullPath)
+        reportEntry = TestHarnessReport(randomUUID, currentDate, "Raw Text Lines/Count", run_type, run_size.toString, timed.toMinutes, timed.toSeconds,timed.toMillis,sparkCoresMax,master, l0FullPath)
         logger.info(reportEntry)
         performanceIndicators += reportEntry
 

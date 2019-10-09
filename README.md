@@ -84,7 +84,7 @@
     using provided recipe.
   * `brew casks install anaconda` followed by `conda init bash`
     * Restart your shell terminal, after installing anaconda and initializing bash shell to recognize location of conda binaries 
-  * `conda env create -f ./scenario-file-generator/conda.recipe/test-harness.yml`
+  * `conda env create -f ./utils/conda.recipe/test-harness.yml`
     * you will need to run this command in the directory where you check out this test-harness project from [GitHub](https://github.com/alexshagiev/spark-test-harness)
     This will create a python environment with necessary hdfs libraries to run data generator 
   * `conda activate test-harness`
@@ -144,8 +144,8 @@
   
   # install anaconda
   rm -rf Anaconda2-2019.07-Linux-x86_64.sh
-  wget https://repo.continuum.io/archive/Anaconda2-2019.07-Linux-x86_64.sh
   rm -rf ./anaconda2
+  wget https://repo.continuum.io/archive/Anaconda2-2019.07-Linux-x86_64.sh
   bash Anaconda2-2019.07-Linux-x86_64.sh -b -p ./anaconda2
   ./anaconda2/condabin/conda init bash
   source .bashrc
@@ -156,7 +156,7 @@
   sudo yum install -y apache-maven
   
   # maven install with jdk 1.7 so fix env to point to jdk 1.8
-  sudo yum install java-1.8.0-devel
+  sudo yum install -y java-1.8.0-devel
   sudo /usr/sbin/alternatives --set java /usr/lib/jvm/java-1.8.0-openjdk.x86_64/bin/java
   sudo /usr/sbin/alternatives --set javac /usr/lib/jvm/java-1.8.0-openjdk.x86_64/bin/javac
   
@@ -195,8 +195,17 @@
   
   ![alt_text](README.md.resources/aws-erm-cluster-waiting.png) 
 
-### Load HDFS
-  * `conda env create -f ./scenario-file-generator/conda.recipe/test-harness.yml`
+# Scripted Creation of EMR cluster
+ * Create a Free Tier `t2.micro` instance, includes 1 CPU, 1G RAM, Transient [Elastic Brock Storage (EBS)](https://aws.amazon.com/ebs/)
+ * Configure Your [AWS Command Line Interface (CLI)](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html)
+ * Create a new `aws-hadoop-create` Identity [Identity Accesss Management ]( https://console.aws.amazon.com/iam/home#/users) 
+ * Run `aws configure` on your aws EC2 micro node and assign KeyID & AccessKey from the new `aws-hadoop-create`
+ Identity for region & output format use `us-east-2` & `json` or other appropriate defaults  
+ * `aws emr create-cluster --release-label emr-5.26.0 --use-default-roles --applications Name=Spark Name=Hadoop --ec2-attributes KeyName=aws-emr-key --instance-fleets InstanceFleetType=MASTER,TargetSpotCapacity=1,InstanceTypeConfigs=['{InstanceType=m4.large}'] InstanceFleetType=CORE,TargetSpotCapacity=2,InstanceTypeConfigs=['{InstanceType=m4.large}'] --auto-terminate`
+ 
+
+# Load HDFS
+  * `conda env create -f ./utils/conda.recipe/test-harness.yml`
   * you will need to run this command in the directory where you check out this test-harness project from [github.com]
     This will create a python environment with necessary hdfs libraries to run data generator 
   * `conda activate test-harness`

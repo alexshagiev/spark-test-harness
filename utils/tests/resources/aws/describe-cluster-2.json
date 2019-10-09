@@ -1,0 +1,127 @@
+{
+    "Cluster": {
+        "Status": {
+            "Timeline": {
+                "CreationDateTime": 1570478394.466
+            },
+            "State": "STARTING",
+            "StateChangeReason": {
+                "Message": "Configuring cluster software"
+            }
+        },
+        "Ec2InstanceAttributes": {
+            "EmrManagedMasterSecurityGroup": "sg-08e4d223d9d036bb0",
+            "RequestedEc2AvailabilityZones": [],
+            "RequestedEc2SubnetIds": [],
+            "IamInstanceProfile": "EMR_EC2_DefaultRole",
+            "Ec2KeyName": "aws-emr-key",
+            "Ec2AvailabilityZone": "us-east-2c",
+            "EmrManagedSlaveSecurityGroup": "sg-088f0e551c3fdb161"
+        },
+        "Name": "Development Cluster",
+        "ServiceRole": "EMR_DefaultRole",
+        "Tags": [],
+        "TerminationProtected": false,
+        "ReleaseLabel": "emr-5.26.0",
+        "NormalizedInstanceHours": 0,
+        "InstanceCollectionType": "INSTANCE_FLEET",
+        "InstanceFleets": [
+            {
+                "Status": {
+                    "Timeline": {
+                        "CreationDateTime": 1570478394.469
+                    },
+                    "State": "PROVISIONING",
+                    "StateChangeReason": {
+                        "Message": ""
+                    }
+                },
+                "ProvisionedSpotCapacity": 2,
+                "Name": "CORE",
+                "InstanceFleetType": "CORE",
+                "LaunchSpecifications": {
+                    "SpotSpecification": {
+                        "TimeoutDurationMinutes": 120,
+                        "TimeoutAction": "TERMINATE_CLUSTER"
+                    }
+                },
+                "TargetSpotCapacity": 2,
+                "ProvisionedOnDemandCapacity": 0,
+                "InstanceTypeSpecifications": [
+                    {
+                        "EbsBlockDevices": [
+                            {
+                                "VolumeSpecification": {
+                                    "VolumeType": "gp2",
+                                    "SizeInGB": 32
+                                }
+                            }
+                        ],
+                        "BidPriceAsPercentageOfOnDemandPrice": 100.0,
+                        "InstanceType": "m4.large",
+                        "WeightedCapacity": 1
+                    }
+                ],
+                "Id": "if-SQSGBZCU793R",
+                "TargetOnDemandCapacity": 0
+            },
+            {
+                "Status": {
+                    "Timeline": {
+                        "CreationDateTime": 1570478394.469
+                    },
+                    "State": "BOOTSTRAPPING",
+                    "StateChangeReason": {
+                        "Message": ""
+                    }
+                },
+                "ProvisionedSpotCapacity": 1,
+                "Name": "MASTER",
+                "InstanceFleetType": "MASTER",
+                "LaunchSpecifications": {
+                    "SpotSpecification": {
+                        "TimeoutDurationMinutes": 120,
+                        "TimeoutAction": "TERMINATE_CLUSTER"
+                    }
+                },
+                "TargetSpotCapacity": 1,
+                "ProvisionedOnDemandCapacity": 0,
+                "InstanceTypeSpecifications": [
+                    {
+                        "EbsBlockDevices": [
+                            {
+                                "VolumeSpecification": {
+                                    "VolumeType": "gp2",
+                                    "SizeInGB": 32
+                                }
+                            }
+                        ],
+                        "BidPriceAsPercentageOfOnDemandPrice": 100.0,
+                        "InstanceType": "m4.large",
+                        "WeightedCapacity": 1
+                    }
+                ],
+                "Id": "if-981X0V466K0L",
+                "TargetOnDemandCapacity": 0
+            }
+        ],
+        "Applications": [
+            {
+                "Version": "2.4.3",
+                "Name": "Spark"
+            },
+            {
+                "Version": "2.8.5",
+                "Name": "Hadoop"
+            }
+        ],
+        "KerberosAttributes": {},
+        "ScaleDownBehavior": "TERMINATE_AT_TASK_COMPLETION",
+        "VisibleToAllUsers": true,
+        "BootstrapActions": [],
+        "MasterPublicDnsName": "ec2-3-18-214-127.us-east-2.compute.amazonaws.com",
+        "AutoTerminate": false,
+        "Id": "j-1UN03TXGVX8TL",
+        "Configurations": []
+    }
+}

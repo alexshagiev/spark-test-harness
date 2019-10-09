@@ -165,7 +165,7 @@
                         <configuration>
                             <executable>python</executable>
                             <arguments>
-                                <argument>${project.basedir}/scenario-file-generator/generate_jsonl_data.py</argument>
+                                <argument>${project.basedir}/utils/generate_jsonl_data.py</argument>
                                 <argument>--config</argument>
                                 <argument>${project.build.sourceDirectory}/../resources/application.conf</argument>
                                 <argument>-o</argument>
