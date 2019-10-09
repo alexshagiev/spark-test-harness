@@ -6,4 +6,4 @@ dependencies:
   - pyhocon
   - hdfs3
   - pyarrow
-  - tqdmy
+  - tqdm
