@@ -14,18 +14,21 @@ logger = logging.getLogger(__name__)
 
 def create_cluster(timeout: int, cores: int, local_test_mode: bool) -> str:
     cmd = 'cat ./../tests/resources/aws/create-cluster.json' if local_test_mode else \
-        "aws emr create-cluster --release-label emr-5.26.0 --use-default-roles" \
-        + "--applications Name=Spark Name=Hadoop" \
-        + "--ec2-attributes KeyName=aws-emr-key" \
-        + "--instance-fleets" \
-        + "InstanceFleetType=MASTER,TargetSpotCapacity=1,InstanceTypeConfigs=['{InstanceType=m4.large}'],LaunchSpecifications={SpotSpecification='{TimeoutDurationMinutes={timeout},TimeoutAction=TERMINATE_CLUSTER}'}" \
-        + "InstanceFleetType=CORE,TargetSpotCapacity={cores},InstanceTypeConfigs=['{InstanceType=m4.large}'],LaunchSpecifications={SpotSpecification='{TimeoutDurationMinutes={timeout},TimeoutAction=TERMINATE_CLUSTER}'}" \
-        + "".format(cores=cores, timeout=timeout)
+        "aws emr create-cluster \
+        --release-label emr-5.26.0 --use-default-roles --applications Name=Spark Name=Hadoop \
+        --ec2-attributes KeyName=aws-emr-key \
+        --instance-fleets \
+        InstanceFleetType=MASTER,TargetSpotCapacity=1,InstanceTypeConfigs=['{InstanceType=m4.large}'],LaunchSpecifications={SpotSpecification='{TimeoutDurationMinutes=1,TimeoutAction=TERMINATE_CLUSTER}'} \
+        InstanceFleetType=CORE,TargetSpotCapacity=2,InstanceTypeConfigs=['{InstanceType=m4.large}'],LaunchSpecifications={SpotSpecification='{TimeoutDurationMinutes=1,TimeoutAction=TERMINATE_CLUSTER}'} \
+        "
 
     logger.info("exec: {}".format(cmd))
-    result = run([cmd], check=True, shell=True, universal_newlines=True, stdout=PIPE, stderr=PIPE).stdout
+    result = run([cmd], shell=True, universal_newlines=True, stdout=PIPE, stderr=PIPE)
+    if result.returncode != 0:
+        raise Exception(result.stderr)
+
     cluster_id = json.loads(result)['ClusterId']
-    logger.info('ClusterId: {}, details: {}'.format(cluster_id, result.replace('\n', '').replace('  ', '')))
+    logger.info('ClusterId: {}, details: {}'.format(cluster_id, result.stdout.replace('\n', '').replace('  ', '')))
     return cluster_id
 
 
@@ -67,7 +70,8 @@ def get_aws_emr_public_master_dns_name_on_waiting(cluster_id: str, timeout: int,
 def show_help():
     print(
         'generate_scenarios_aws_spot_cluster.py --spot-core-capacity 2 --hdfs-port                   # will use input stream')
-    print('generate_scenarios_aws_spot_cluster.py -i <path_to_status_file.json> # will use file location to pull the status')
+    print(
+        'generate_scenarios_aws_spot_cluster.py -i <path_to_status_file.json> # will use file location to pull the status')
 
 
 def main(argv):
