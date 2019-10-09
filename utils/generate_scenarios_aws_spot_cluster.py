@@ -66,8 +66,8 @@ def get_aws_emr_public_master_dns_name_on_waiting(cluster_id: str, timeout: int,
 
 def show_help():
     print(
-        'create-cluster-populate-data.py --spot-core-capacity 2 --hdfs-port                   # will use input stream')
-    print('create-cluster-populate-data.py -i <path_to_status_file.json> # will use file location to pull the status')
+        'generate_scenarios_aws_spot_cluster.py --spot-core-capacity 2 --hdfs-port                   # will use input stream')
+    print('generate_scenarios_aws_spot_cluster.py -i <path_to_status_file.json> # will use file location to pull the status')
 
 
 def main(argv):
