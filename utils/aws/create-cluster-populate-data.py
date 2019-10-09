@@ -77,6 +77,8 @@ def main(argv):
         show_help()
         sys.exit(2)
 
+    local_test_mode = False
+
     for opt, arg in opts:
         if opt == '-h':
             show_help()
