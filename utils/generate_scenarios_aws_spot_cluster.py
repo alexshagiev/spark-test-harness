@@ -18,8 +18,8 @@ def create_cluster(timeout: int, cores: int, local_test_mode: bool) -> str:
         --release-label emr-5.26.0 --use-default-roles --applications Name=Spark Name=Hadoop \
         --ec2-attributes KeyName=aws-emr-key \
         --instance-fleets \
-        InstanceFleetType=MASTER,TargetSpotCapacity=1,InstanceTypeConfigs=['{InstanceType=m4.large}'],LaunchSpecifications={SpotSpecification='{TimeoutDurationMinutes=1,TimeoutAction=TERMINATE_CLUSTER}'} \
-        InstanceFleetType=CORE,TargetSpotCapacity=2,InstanceTypeConfigs=['{InstanceType=m4.large}'],LaunchSpecifications={SpotSpecification='{TimeoutDurationMinutes=1,TimeoutAction=TERMINATE_CLUSTER}'} \
+        InstanceFleetType=MASTER,TargetSpotCapacity=1,InstanceTypeConfigs=['{InstanceType=m4.large}'],LaunchSpecifications={SpotSpecification='{TimeoutDurationMinutes=5,TimeoutAction=TERMINATE_CLUSTER}'} \
+        InstanceFleetType=CORE,TargetSpotCapacity=2,InstanceTypeConfigs=['{InstanceType=m4.large}'],LaunchSpecifications={SpotSpecification='{TimeoutDurationMinutes=5,TimeoutAction=TERMINATE_CLUSTER}'} \
         "
 
     logger.info("exec: {}".format(cmd))

@@ -198,9 +198,11 @@
 # Scripted Creation of EMR cluster
  * Create a Free Tier `t2.micro` instance, includes 1 CPU, 1G RAM, Transient [Elastic Brock Storage (EBS)](https://aws.amazon.com/ebs/)
  * Configure Your [AWS Command Line Interface (CLI)](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html)
- * Create a new `aws-hadoop-create` Identity [Identity Accesss Management ]( https://console.aws.amazon.com/iam/home#/users) 
- * Run `aws configure` on your aws EC2 micro node and assign KeyID & AccessKey from the new `aws-hadoop-create`
- Identity for region & output format use `us-east-2` & `json` or other appropriate defaults  
+ * Create a new `emr-create-id` Identity [Identity Accesss Management ]( https://console.aws.amazon.com/iam/home#/users), chose Programmatic Type for access. This id needs to be assigned to a new group `emr-create-group` withe `
+AmazonElasticMapReduceFullAccess` role 
+ * When finished creating you will be given `Access Key ID` and `Secret Access Key`, save both you will not be able to retrive them later. 
+ * Run `aws configure` on your aws EC2 micro node and assign KeyID & AccessKey from the new `emr-create-id`
+ Identity for region use `us-east-2` other appropriate defaults. Make sure the output format is `json`
  * `aws emr create-cluster --release-label emr-5.26.0 --use-default-roles --applications Name=Spark Name=Hadoop --ec2-attributes KeyName=aws-emr-key --instance-fleets InstanceFleetType=MASTER,TargetSpotCapacity=1,InstanceTypeConfigs=['{InstanceType=m4.large}'] InstanceFleetType=CORE,TargetSpotCapacity=2,InstanceTypeConfigs=['{InstanceType=m4.large}'] --auto-terminate`
  
 
