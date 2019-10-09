@@ -18,8 +18,8 @@ def create_cluster(timeout: int, cores: int, local_test_mode: bool) -> str:
         --release-label emr-5.26.0 --use-default-roles --applications Name=Spark Name=Hadoop \
         --ec2-attributes KeyName=aws-emr-key \
         --instance-fleets \
-        InstanceFleetType=MASTER,TargetSpotCapacity=1,InstanceTypeConfigs=['{InstanceType=m4.large}'],LaunchSpecifications={SpotSpecification='{TimeoutDurationMinutes=5,TimeoutAction=TERMINATE_CLUSTER}'} \
-        InstanceFleetType=CORE,TargetSpotCapacity=2,InstanceTypeConfigs=['{InstanceType=m4.large}'],LaunchSpecifications={SpotSpecification='{TimeoutDurationMinutes=5,TimeoutAction=TERMINATE_CLUSTER}'} \
+        InstanceFleetType=MASTER,TargetSpotCapacity=1,InstanceTypeConfigs=['{InstanceType=m4.large}'],LaunchSpecifications={SpotSpecification='{TimeoutDurationMinutes="+timeout+",TimeoutAction=TERMINATE_CLUSTER}'} \
+        InstanceFleetType=CORE,TargetSpotCapacity="+cores+",InstanceTypeConfigs=['{InstanceType=m4.large}'],LaunchSpecifications={SpotSpecification='{TimeoutDurationMinutes="+timeout+",TimeoutAction=TERMINATE_CLUSTER}'} \
         "
 
     logger.info("exec: {}".format(cmd))
@@ -55,10 +55,9 @@ def get_aws_emr_public_master_dns_name_on_waiting(cluster_id: str, timeout: int,
             return master_public_dns
         else:
             logger.info(
-                'Cluster Creation not complete. Timeout: {}min, Attempt: {}, State: {}, master_public_dns: {}, details: {}'.format(
-                    timeout, attempt, state, master_public_dns,
-                    result.replace('\n', '').replace('  ',
-                                                     '')))
+                'Cluster Creation not complete. Timeout: {}min, Attempt: {}, State: {}, master_public_dns: {}'.format(
+                    timeout, attempt, state, master_public_dns))
+            logger.debug('Cluster Current Details details: {}'.format(result.replace('\n', '').replace('  ', '')))
             for i in tqdm(range(5)):
                 time.sleep(1)
 
@@ -90,7 +89,7 @@ def main(argv):
         elif opt in ("-t", "--test"):
             local_test_mode = True
 
-    timeout = 1
+    timeout = 5
     cores = 2
     cluster_id = create_cluster(timeout, cores, local_test_mode)
     #
