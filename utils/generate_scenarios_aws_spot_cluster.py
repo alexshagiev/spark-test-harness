@@ -54,12 +54,14 @@ def get_aws_emr_public_master_dns_name_on_waiting(cluster_id: str, timeout: int,
             j = json.loads(result)
             state = j['Cluster']['Status']['State']
             master_public_dns = j['Cluster'].get('MasterPublicDnsName')
+            core_state = j['Cluster']['InstanceFleets'][0]['Status']['State']
+            master_state = j['Cluster']['InstanceFleets'][1]['Status']['State']
 
             logger.debug('Cluster Current Details details: {}'.format(result.replace('\n', '').replace('  ', '')))
 
             pbar.set_description(
-                'Creating Cluster Timeout: {}min, Attempt: {}, State: {}, master_public_dns: {}'.format(
-                    timeout, attempt, state, master_public_dns))
+                'Timeout: {}min, Check#: {}, State: {}, Master State {}, Core State {}, master_public_dns: {}'.format(
+                    timeout, attempt, state, master_state, core_state, master_public_dns))
             sleep_interval_sec = 5
             pbar.update(sleep_interval_sec)
 
@@ -105,14 +107,15 @@ def main(argv):
         elif opt in ("-t", "--test"):
             local_test_mode = True
 
-    timeout = 5
+    timeout = 10
     cores = 2
     cluster_id = create_cluster(timeout, cores, local_test_mode)
     #
     host_name = get_aws_emr_public_master_dns_name_on_waiting(cluster_id, timeout, local_test_mode)
     logger.info(host_name)
     default_fs = 'hdfs://localhost:9000' if local_test_mode else 'hdfs://{}:{}'.format(host_name, '8020')
-    output = create_home_dir(host_name, 'test-harness')
+    if not local_test_mode:
+        output = create_home_dir(host_name, 'test-harness')
 
     generate_jsonl_data.main(
         [sys.argv[0], '-c', './../src/main/resources/application.conf', '-o', 'hdfs', '--default-fs', default_fs])
