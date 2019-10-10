@@ -97,8 +97,8 @@ def create_home_dir(host_name: str, dir_name: str) -> str:
 def show_help():
     print(
         'generate_scenarios_aws_spot_cluster.py --spot-core-capacity 2 --hdfs-port                   # will use input stream')
-    print(
-        'generate_scenarios_aws_spot_cluster.py -i <path_to_status_file.json> # will use file location to pull the status')
+    print("generate_scenarios_aws_spot_cluster.py --cluster j-2AXXXXXXGAPLF \
+     Will connect to existing cluster and populate its HDFS with scenario files")
 
 
 def main(argv):
@@ -133,6 +133,8 @@ def main(argv):
 
     generate_jsonl_data.main(
         [sys.argv[0], '-c', './../src/main/resources/application.conf', '-o', 'hdfs', '--default-fs', default_fs])
+# \
+#scp -i ~/aws-emr-key.pem ./target/spark-test-harness-1.0-SNAPSHOT.jar hadoop@ec2-18-223-111-193.us-east-2.compute.amazonaws.com
 
 
 if __name__ == "__main__":

@@ -21,7 +21,6 @@ trait EnvContext extends Logging{
   val run_types_2_sizes = toMap(conf.getAnyRef("scenarios.run"))
   val l0Dir = conf.getString(s"${configRoot}.hdfs.l0-dir")
   val l1Dir = conf.getString(s"${configRoot}.hdfs.l1-dir")
-  val hdfsUrl = conf.getString(s"${configRoot}.hdfs.url")
   val hdfsBaseDir = conf.getString(s"${configRoot}.hdfs.base-dir")
 
   /**

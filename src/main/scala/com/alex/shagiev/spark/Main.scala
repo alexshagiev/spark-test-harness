@@ -42,8 +42,8 @@ object Main extends EnvContext {
         var inputFile = conf.getString(s"scenarios.${run_type}.${run_size}.name")
         var inputDir = conf.getString(s"scenarios.${run_type}.l0-dir")
         var outputDir = conf.getString(s"scenarios.${run_type}.l1-dir")
-        val l0FullPath = s"${hdfsUrl}/${inputDir}/${inputFile}"
-        val l1FullPath = s"${hdfsUrl}/${outputDir}/${inputFile}"
+        val l0FullPath = s"/${inputDir}/${inputFile}"
+        val l1FullPath = s"/${outputDir}/${inputFile}"
 
         var jsonlDF: org.apache.spark.sql.DataFrame = null
         var linesRDD: RDD[String] = null
