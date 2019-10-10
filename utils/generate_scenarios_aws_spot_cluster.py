@@ -54,8 +54,14 @@ def get_aws_emr_public_master_dns_name_on_waiting(cluster_id: str, timeout: int,
             j = json.loads(result)
             state = j['Cluster']['Status']['State']
             master_public_dns = j['Cluster'].get('MasterPublicDnsName')
-            core_state = j['Cluster']['InstanceFleets'][0]['Status']['State']
-            master_state = j['Cluster']['InstanceFleets'][1]['Status']['State']
+            core_state = 'NEW'
+            master_state = 'NEW'
+            for i in range(2):
+                state = j['Cluster']['InstanceFleets'][i]['Name']
+                if state == 'CORE':
+                    core_state = j['Cluster']['InstanceFleets'][i]['Status']['State']
+                else:
+                    master_state = j['Cluster']['InstanceFleets'][i]['Status']['State']
 
             logger.debug('Cluster Current Details details: {}'.format(result.replace('\n', '').replace('  ', '')))
 
@@ -77,10 +83,14 @@ def get_aws_emr_public_master_dns_name_on_waiting(cluster_id: str, timeout: int,
 
 
 def create_home_dir(host_name: str, dir_name: str) -> str:
-    cmd = 'ssh -i ~/aws-emr-key.pem hadoop@{} hdfs dfs -mkdir -p /user/{}'.format(host_name, dir_name)
+    key_check_disable = '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+    cmd = 'ssh {} -i ~/aws-emr-key.pem hadoop@{} hdfs dfs -mkdir -p /user/{}'.format(key_check_disable, host_name,
+                                                                                     dir_name)
     logger.debug("exec: {}".format(cmd))
     result = run([cmd], check=True, shell=True, universal_newlines=True, stdout=PIPE, stderr=PIPE)
-    cmd = 'ssh -i ~/aws-emr-key.pem hadoop@{} hdfs dfs -chmod -R 777 /user/{}'.format(host_name, dir_name)
+    cmd = 'ssh {} -i ~/aws-emr-key.pem hadoop@{} hdfs dfs -chmod -R 777 /user/{}'.format(key_check_disable, host_name,
+                                                                                         dir_name)
+    result = run([cmd], check=True, shell=True, universal_newlines=True, stdout=PIPE, stderr=PIPE)
     return result.stdout
 
 
@@ -93,12 +103,13 @@ def show_help():
 
 def main(argv):
     try:
-        opts, args = getopt.getopt(argv[1:], "ht", ["test"])
+        opts, args = getopt.getopt(argv[1:], "htc:", ["test", "cluster="])
     except getopt.GetoptError:
         show_help()
         sys.exit(2)
 
     local_test_mode = False
+    cluster_id = ''
 
     for opt, arg in opts:
         if opt == '-h':
@@ -106,10 +117,13 @@ def main(argv):
             sys.exit()
         elif opt in ("-t", "--test"):
             local_test_mode = True
+        elif opt in ("-c", "--cluster"):
+            cluster_id = arg
 
     timeout = 10
     cores = 2
-    cluster_id = create_cluster(timeout, cores, local_test_mode)
+    if cluster_id == '':
+        cluster_id = create_cluster(timeout, cores, local_test_mode)
     #
     host_name = get_aws_emr_public_master_dns_name_on_waiting(cluster_id, timeout, local_test_mode)
     logger.info(host_name)
