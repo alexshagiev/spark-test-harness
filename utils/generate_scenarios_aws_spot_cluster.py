@@ -57,8 +57,8 @@ def get_aws_emr_public_master_dns_name_on_waiting(cluster_id: str, timeout: int,
             core_state = 'NEW'
             master_state = 'NEW'
             for i in range(2):
-                state = j['Cluster']['InstanceFleets'][i]['Name']
-                if state == 'CORE':
+                node_state = j['Cluster']['InstanceFleets'][i]['Name']
+                if node_state == 'CORE':
                     core_state = j['Cluster']['InstanceFleets'][i]['Status']['State']
                 else:
                     master_state = j['Cluster']['InstanceFleets'][i]['Status']['State']
