@@ -85,6 +85,7 @@ def main(argv):
         sys.exit(2)
 
     default_fs = ''
+    output=''
     for opt, arg in opts:
         if opt == ('-h', '--help'):
             show_help()
