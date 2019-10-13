@@ -70,8 +70,8 @@ def get_aws_emr_public_master_dns_name_on_waiting(cluster_id: str, timeout: int,
             logger.debug('Cluster Current Details details: {}'.format(result.replace('\n', '').replace('  ', '')))
 
             p_bar.set_description(
-                'Timeout: {}min, Check#: {}, State: {}, Master State {}, Core State {}'.format(
-                    timeout, attempt, state, master_state, core_state))
+                'Check#: {}, State: {}, Master State {}, Core State {}'.format(
+                    attempt, state, master_state, core_state))
             sleep_interval_sec = 5
             p_bar.update(sleep_interval_sec)
 
@@ -181,6 +181,7 @@ def main(argv):
     if cluster_id == '':
         cluster_id = create_cluster(timeout, core_nodes, local_test_mode)
 
+    logger.info('Creating Cluster Timeout: {}min'.format(timeout))
     host_name = get_aws_emr_public_master_dns_name_on_waiting(cluster_id, timeout, local_test_mode)
     logger.info('Clusters Public Master DNS: {}'.format(host_name))
     port = '9000' if local_test_mode else '8020'
@@ -190,7 +191,7 @@ def main(argv):
     if populate_hdfs:
         logger.info("Populating Data into Cluster: {}, HDFS: {}".format(cluster_id, default_fs))
         generate_jsonl_data.main(
-            [sys.argv[0], '-c', './../src/main/resources/application.conf', '-o', 'hdfs', '--default-fs', default_fs])
+            [sys.argv[0], '--config', './../src/main/resources/application.conf', '--output', 'hdfs', '--default-fs', default_fs])
 
     if spark_submit:
         logger.info("Submitting Spark Job into Cluster: {}".format(cluster_id))
