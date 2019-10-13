@@ -106,7 +106,7 @@ def create_hdfs_home_dir(host_name: str, dir_name: str, local_test_mode: bool) -
 def copy_jar_to_spot_cluster(jar_file_name: str, public_master_dns: str, local_test_mode: bool) -> str:
     if not os.path.exists(jar_file_name):
         raise Exception('Jar file does not exist: {}'.format(jar_file_name))
-    dest_dir = '/mnt/var/lib/hadoop/steps'
+    dest_dir = '/mnt/var/lib/hadoop/'
     dest = 'hadoop@{}:{}'.format(public_master_dns, dest_dir)
     cmd = 'scp {} {} {} {}'.format(ssh_key_check_disable, ssh_pem_key, jar_file_name, dest)
     logger.debug("exec: {}".format(cmd))
