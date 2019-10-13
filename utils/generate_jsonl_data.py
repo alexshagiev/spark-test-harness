@@ -59,8 +59,9 @@ def create_scenarios(output: str, conf: list):
             if output == 'hdfs':
                 l0_dir = conf['scenarios'][run_type]['l0-dir']
                 if not hdfs.isdir(l0_dir):
-                    logger.info('Creating l0 directory for type={} dir={}'.format(type, l0_dir))
+                    logger.info('Creating l0 directory for run_type={} dir={}'.format(run_type, l0_dir))
                     hdfs.mkdir(l0_dir)
+                logger.info('Creating file: {}'.format(l0_dir + '/' + name))
                 with hdfs.open(l0_dir + '/' + name, 'wb') as file:
                     generator.jsonl.write(file, columns, rows, rows_uniqueness_factor)
             else:
@@ -85,7 +86,7 @@ def main(argv):
         sys.exit(2)
 
     default_fs = ''
-    output=''
+    output = ''
     for opt, arg in opts:
         if opt == ('-h', '--help'):
             show_help()
@@ -103,6 +104,7 @@ def main(argv):
         if not default_fs == '':
             conf['conf']['hdfs']['default-fs'] = default_fs
 
+        logger.info("Creating scenarios output:{}, conf:{}".format(output, conf))
         create_scenarios(output, conf)
 
         if __name__ == "__main__":

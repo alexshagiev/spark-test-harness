@@ -100,7 +100,7 @@ def create_hdfs_home_dir(host_name: str, dir_name: str, local_test_mode: bool) -
                                                                        host_name,
                                                                        dir_name)
     result = run([cmd], check=True, shell=True, universal_newlines=True, stdout=PIPE, stderr=PIPE)
-    return result.stdout
+    return 'usr/{}'.format(host_name)
 
 
 def copy_jar_to_spot_cluster(jar_file_name: str, public_master_dns: str, local_test_mode: bool) -> str:
@@ -158,8 +158,10 @@ def main(argv):
         logger.info('Running on local host not AWS')
         logger.info('###' * 10)
 
+    script_home = str(Path(sys.argv[0]).parent)
+
     populate_hdfs = False
-    spark_submit_jar = './../target/spark-test-harness-1.0-SNAPSHOT.jar'
+    spark_submit_jar = script_home + '/./../target/spark-test-harness-1.0-SNAPSHOT.jar'
     spark_submit = False
     cluster_id = ''
     timeout = 10
@@ -192,10 +194,10 @@ def main(argv):
 
 
     if populate_hdfs:
-        logger.info("Populating Data into Cluster: {}, HDFS: {}".format(cluster_id, default_fs))
+        logger.info("Populating Data into Cluster: {}, default-fs: {}".format(cluster_id, default_fs))
         output = create_hdfs_home_dir(host_name, 'test-harness', local_test_mode)
         logger.info("Created home dir for test-harness: {}".format(output))
-        script_home = str(Path(sys.argv[0]).parent)
+
         generate_jsonl_data.main(
             [sys.argv[0], '--config', script_home + '/./../src/main/resources/application.conf', '--output', 'hdfs', '--default-fs', default_fs])
         sys.exit(0)
