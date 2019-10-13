@@ -90,6 +90,7 @@ def main(argv):
     config_file = './application.conf'
 
     for opt, arg in opts:
+        logger.info('opt:{}, arg:{}'.format(opt,arg))
         if opt == ('-h', '--help'):
             show_help()
             sys.exit()
