@@ -79,7 +79,7 @@ def show_help():
 
 def main(argv):
     try:
-        logger.info('Starting with: argv: {}'.format(argv))
+        logger.debug('Starting with: argv: {}'.format(argv))
         opts, args = getopt.getopt(argv[1:], "h", ["help", "config=", "output=", "default-fs="])
     except getopt.GetoptError:
         show_help()
@@ -90,7 +90,6 @@ def main(argv):
     config_file = './application.conf'
 
     for opt, arg in opts:
-        logger.info('opt:{}, arg:{}'.format(opt,arg))
         if opt == ('-h', '--help'):
             show_help()
             sys.exit()
@@ -101,15 +100,15 @@ def main(argv):
         elif opt in "--default-fs":
             default_fs = arg
 
-        logger.info('output:{}, default-fs:{}'.format(output, default_fs))
-        logger.info('Loading config file:{}'.format(config_file))
+    logger.info('output:{}, default-fs:{}'.format(output, default_fs))
+    logger.info('Loading config file:{}'.format(config_file))
 
-        conf = ConfigFactory.parse_file(config_file)
-        if not default_fs == '':
-            conf['conf']['hdfs']['default-fs'] = default_fs
+    conf = ConfigFactory.parse_file(config_file)
+    if not default_fs == '':
+        conf['conf']['hdfs']['default-fs'] = default_fs
 
-        logger.info("Creating scenarios output:{}, conf:{}".format(output, conf))
-        create_scenarios(output, conf)
+    logger.info("Creating scenarios output:{}, conf:{}".format(output, conf))
+    create_scenarios(output, conf)
 
 
 if __name__ == "__main__":
