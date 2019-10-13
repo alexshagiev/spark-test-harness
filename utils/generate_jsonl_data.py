@@ -78,7 +78,6 @@ def show_help():
 
 
 def main(argv):
-
     try:
         logger.info('Starting with: argv: {}'.format(argv))
         opts, args = getopt.getopt(argv[1:], "h", ["help", "config=", "output=", "default-fs="])
@@ -101,6 +100,7 @@ def main(argv):
         elif opt in "--default-fs":
             default_fs = arg
 
+        logger.info('output:{}, default-fs:{}'.format(output, default_fs))
         logger.info('Loading config file:{}'.format(config_file))
 
         conf = ConfigFactory.parse_file(config_file)
