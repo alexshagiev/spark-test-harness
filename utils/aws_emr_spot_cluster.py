@@ -115,7 +115,7 @@ def copy_jar_to_spot_cluster(jar_file_name_path: str, public_master_dns: str, lo
     dest_dir = '/mnt/var/lib/hadoop/' + jar_file_name
     dest = 'hadoop@{}:{}'.format(public_master_dns, dest_dir)
     cmd = 'scp {} {} {} {}'.format(ssh_key_check_disable, ssh_pem_key, jar_file_name_path, dest)
-    logger.debug("exec: {}".format(cmd))
+    logger.info("exec: {}".format(cmd))
     if local_test_mode:
         logger.info('Remote command: {}'.format(cmd))
         return dest
@@ -217,7 +217,7 @@ def main(argv):
     if spark_submit:
         logger.info("Submitting Spark Job into Cluster: {}".format(cluster_id))
         remote_uri_path = copy_jar_to_spot_cluster(spark_submit_jar, host_name, local_test_mode)
-        remote_jar_path = 'file:/' + remote_uri_path.split(':')[-1] + '/' + spark_submit_jar
+        remote_jar_path = 'file:/' + remote_uri_path.split(':')[-1]
         run_spark_submit(cluster_id, remote_jar_path, local_test_mode)
 
 
