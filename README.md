@@ -101,6 +101,12 @@
 ### Install Spark
   * `brew install apache-spark`
     * This will install __Apache Spark__ service under `/usr/local/Cellar/apache-spark/2.4.3/` which will refer to as `${SPARK_HOME}` further in instructions.
+  * Configure Spark to inherit HDFS configuration
+    * Locate file `${SPARK_HOME}/libexec/conf/spak-env.sh` and set the following variables. If the file is missing create one or copy from the template
+    ~~~shell script
+    HADOOP_HOME=/usr/local/Cellar/hadoop/3.1.2
+    HADOOP_CONF_DIR=${HADOOP_HOME}/libexec/etc/hadoop
+    ~~~
 
 ### Start Stand Alone Spark Cluster
   * Start script

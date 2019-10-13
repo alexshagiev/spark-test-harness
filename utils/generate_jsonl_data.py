@@ -72,37 +72,37 @@ def create_scenarios(output: str, conf: list):
 
 
 def show_help():
-    print('generate_jsonl_data.py -c <path_to_application.conf> -o [hdfs|<local_path>] -d <hdfs://host:port override>')
+    print(
+        'generate_jsonl_data.py --config <path_to_application.conf> --output [hdfs|<local_path>] --default-fs <hdfs://host:port override>')
 
 
 def main(argv):
     config_file = './application.conf'
     try:
-        opts, args = getopt.getopt(argv[1:], "hc:o:d:", ["config=", "output=","default-fs="])
+        opts, args = getopt.getopt(argv[1:], "h", ["help", "config=", "output=", "default-fs="])
     except getopt.GetoptError:
         show_help()
         sys.exit(2)
 
     default_fs = ''
     for opt, arg in opts:
-        if opt == '-h':
+        if opt == ('-h', '--help'):
             show_help()
             sys.exit()
-        elif opt in ("-c", "--config"):
+        elif opt in "--config":
             config_file = arg
-        elif opt in ("-o", "--output"):
+        elif opt in "--output":
             output = arg
-        elif opt in ("-d", "--default-fs"):
+        elif opt in "--default-fs":
             default_fs = arg
 
-    logger.info('Loading config file:{}'.format(config_file))
+        logger.info('Loading config file:{}'.format(config_file))
 
-    conf = ConfigFactory.parse_file(config_file)
-    if not default_fs == '':
-        conf['conf']['hdfs']['default-fs'] = default_fs
+        conf = ConfigFactory.parse_file(config_file)
+        if not default_fs == '':
+            conf['conf']['hdfs']['default-fs'] = default_fs
 
-    create_scenarios(output, conf)
+        create_scenarios(output, conf)
 
-
-if __name__ == "__main__":
-    main(sys.argv)
+        if __name__ == "__main__":
+            main(sys.argv)
