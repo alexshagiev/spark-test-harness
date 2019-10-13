@@ -158,9 +158,9 @@ def main(argv):
         logger.info('Running on local host not AWS')
         logger.info('###' * 10)
 
-    populate_hdfs = True
+    populate_hdfs = False
     spark_submit_jar = './../target/spark-test-harness-1.0-SNAPSHOT.jar'
-    spark_submit = True
+    spark_submit = False
     cluster_id = ''
     timeout = 10
     core_nodes = 2
@@ -180,6 +180,8 @@ def main(argv):
             spark_submit = True
 
     if cluster_id == '':
+        populate_hdfs = True
+        spark_submit = True
         cluster_id = create_cluster(timeout, core_nodes, local_test_mode)
 
     logger.info('Creating Cluster Timeout: {}min'.format(timeout))
@@ -194,6 +196,7 @@ def main(argv):
         script_home = str(Path(sys.argv[0]).parent)
         generate_jsonl_data.main(
             [sys.argv[0], '--config', script_home + '/./../src/main/resources/application.conf', '--output', 'hdfs', '--default-fs', default_fs])
+        sys.exit(0)
 
     if spark_submit:
         logger.info("Submitting Spark Job into Cluster: {}".format(cluster_id))
