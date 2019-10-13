@@ -189,10 +189,12 @@ def main(argv):
     logger.info('Clusters Public Master DNS: {}'.format(host_name))
     port = '9000' if local_test_mode else '8020'
     default_fs = 'hdfs://{}:{}'.format(host_name, port)
-    output = create_hdfs_home_dir(host_name, 'test-harness', local_test_mode)
+
 
     if populate_hdfs:
         logger.info("Populating Data into Cluster: {}, HDFS: {}".format(cluster_id, default_fs))
+        output = create_hdfs_home_dir(host_name, 'test-harness', local_test_mode)
+        logger.info("Created home dir for test-harness: {}".format(output))
         script_home = str(Path(sys.argv[0]).parent)
         generate_jsonl_data.main(
             [sys.argv[0], '--config', script_home + '/./../src/main/resources/application.conf', '--output', 'hdfs', '--default-fs', default_fs])
