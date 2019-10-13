@@ -32,7 +32,8 @@ def clean_up_scenarios(hdfs: pa.HadoopFileSystem, conf: list, types: list, sizes
             # logger.info('hdfs -ls {} {}'.format(l0_dir, '\n'.join(files)))
         except Exception as e:
             continue
-        hdfs.delete(l0_dir, recursive=True)
+        if hdfs.exists(l0_dir):
+            hdfs.delete(l0_dir, recursive=True)
 
 
 def create_scenarios(output: str, conf: list):
