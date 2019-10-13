@@ -73,7 +73,10 @@ def get_aws_emr_public_master_dns_name_on_waiting(cluster_id: str, timeout: int,
             p_bar.set_description(
                 'Check#: {}, State: {}, Master State {}, Core State {}'.format(
                     attempt, state, master_state, core_state))
-            sleep_interval_sec = 5
+            if local_test_mode:
+                sleep_interval_sec = 1
+            else:
+                sleep_interval_sec = 5
             p_bar.update(sleep_interval_sec)
 
             if state == 'WAITING':
@@ -103,12 +106,15 @@ def create_hdfs_home_dir(host_name: str, dir_name: str, local_test_mode: bool) -
     return 'usr/{}'.format(host_name)
 
 
-def copy_jar_to_spot_cluster(jar_file_name: str, public_master_dns: str, local_test_mode: bool) -> str:
-    if not os.path.exists(jar_file_name):
-        raise Exception('Jar file does not exist: {}'.format(jar_file_name))
-    dest_dir = '/mnt/var/lib/hadoop/'
+def copy_jar_to_spot_cluster(jar_file_name_path: str, public_master_dns: str, local_test_mode: bool) -> str:
+    if not Path(jar_file_name_path).exists():
+        raise Exception('Jar file does not exist: {}'.format(jar_file_name_path))
+    else:
+        jar_file_name = Path(jar_file_name_path).name
+
+    dest_dir = '/mnt/var/lib/hadoop/' + jar_file_name
     dest = 'hadoop@{}:{}'.format(public_master_dns, dest_dir)
-    cmd = 'scp {} {} {} {}'.format(ssh_key_check_disable, ssh_pem_key, jar_file_name, dest)
+    cmd = 'scp {} {} {} {}'.format(ssh_key_check_disable, ssh_pem_key, jar_file_name_path, dest)
     logger.debug("exec: {}".format(cmd))
     if local_test_mode:
         logger.info('Remote command: {}'.format(cmd))
@@ -183,6 +189,10 @@ def main(argv):
             spark_submit_jar = arg
             spark_submit = True
 
+    if (spark_submit or populate_hdfs) and cluster_id == '':
+        show_help()
+        sys.exit()
+
     if cluster_id == '':
         populate_hdfs = True
         spark_submit = True
@@ -194,14 +204,14 @@ def main(argv):
     port = '9000' if local_test_mode else '8020'
     default_fs = 'hdfs://{}:{}'.format(host_name, port)
 
-
     if populate_hdfs:
         logger.info("Populating Data into Cluster: {}, default-fs: {}".format(cluster_id, default_fs))
         output = create_hdfs_home_dir(host_name, 'test-harness', local_test_mode)
         logger.info("Created home dir for test-harness: {}".format(output))
 
         generate_jsonl_data.main(
-            [sys.argv[0], '--config', script_home + '/./../src/main/resources/application.conf', '--output', 'hdfs', '--default-fs', default_fs])
+            [sys.argv[0], '--config', script_home + '/./../src/main/resources/application.conf', '--output', 'hdfs',
+             '--default-fs', default_fs])
         sys.exit(0)
 
     if spark_submit:
