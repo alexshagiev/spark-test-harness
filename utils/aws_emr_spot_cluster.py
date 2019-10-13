@@ -5,6 +5,7 @@ import json
 import logging
 import time
 from tqdm import tqdm, trange
+from pathlib import Path
 from subprocess import run, PIPE
 import generate_jsonl_data
 
@@ -190,8 +191,9 @@ def main(argv):
 
     if populate_hdfs:
         logger.info("Populating Data into Cluster: {}, HDFS: {}".format(cluster_id, default_fs))
+        script_home = str(Path(sys.argv[0]).parent)
         generate_jsonl_data.main(
-            [sys.argv[0], '--config', './../src/main/resources/application.conf', '--output', 'hdfs', '--default-fs', default_fs])
+            [sys.argv[0], '--config', script_home + '/./../src/main/resources/application.conf', '--output', 'hdfs', '--default-fs', default_fs])
 
     if spark_submit:
         logger.info("Submitting Spark Job into Cluster: {}".format(cluster_id))
