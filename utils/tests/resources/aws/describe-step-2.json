@@ -1,0 +1,24 @@
+{
+  "Step": {
+    "Status": {
+      "Timeline": {
+        "EndDateTime": 1571006946.082,
+        "CreationDateTime": 1571006670.921,
+        "StartDateTime": 1571006697.965
+      },
+      "State": "COMPLETED",
+      "StateChangeReason": {}
+    },
+    "Config": {
+      "Args": [
+        "spark-submit",
+        "file:///mnt/var/lib/hadoop/spark-test-harness-1.0-SNAPSHOT.jar"
+      ],
+      "Jar": "command-runner.jar",
+      "Properties": {}
+    },
+    "Id": "s-35MBDRXQMSWMY",
+    "ActionOnFailure": "CONTINUE",
+    "Name": "test-harness"
+  }
+}

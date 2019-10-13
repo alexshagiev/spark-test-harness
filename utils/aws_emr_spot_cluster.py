@@ -135,12 +135,42 @@ def add_step(cluster_id: str, spark_submit_jar: str, local_test_mode: bool) -> s
     return result.stdout
 
 
-def describe_step(cluster_id: str, step_id: str, attempt, local_test_mode: bool):
+def describe_step(cluster_id: str, step_id: str, attempt, local_test_mode: bool) -> str:
     cmd = 'cat ./tests/resources/aws/describe-step-{}.json'.format(attempt) if local_test_mode else \
-        'aws emr describe-step --cluster-id "{}", --step "{}"'.format(cluster_id, step_id)
+        'aws emr describe-step --cluster-id "{}" --step "{}"'.format(cluster_id, step_id)
     logger.debug("exec: {}".format(cmd))
     result = run([cmd], check=True, shell=True, universal_newlines=True, stdout=PIPE, stderr=PIPE)
     return result.stdout
+
+
+def get_step_result_wait_till_completed(cluster_id: str, step_id: str, local_test_mode: bool) -> str:
+    attempt = 0
+    state = ''
+    timeout = 60  # in minutes
+    t_end = time.time() + timeout * 60
+    with tqdm(total=timeout * 60) as p_bar:
+        while time.time() < t_end:
+            attempt += 1
+            result = describe_step(cluster_id, step_id, attempt, local_test_mode)
+            j = json.loads(result)
+            state = j['Step']['Status']['State']
+
+            p_bar.set_description('Check#: {}, State: {}'.format(attempt, state))
+            if local_test_mode:
+                sleep_interval_sec = 1
+            else:
+                sleep_interval_sec = 5
+            p_bar.update(sleep_interval_sec)
+
+            if state == 'COMPLETED':
+                logger.info('Step Details: {}'.format(result.replace('\n', '').replace('  ', '')))
+                return 'Completed'
+
+            time.sleep(sleep_interval_sec)
+
+    raise Exception(
+        'Step: {} did not reach State "COMPLETED" after timeout: {}min. Current State: {}'.format(cluster_id,
+                                                                                                   timeout, state))
 
 
 def running_local():
@@ -227,7 +257,8 @@ def main(argv):
         output = add_step(cluster_id, remote_jar_path, local_test_mode)
         logger.info("Step Added: {}".format(output))
         step_id = json.loads(output)['StepIds'][0]
-        output = describe_step(cluster_id, step_id, 1, local_test_mode)
+        get_step_result_wait_till_completed(cluster_id, step_id, local_test_mode)
+        output = describe_step(cluster_id, step_id, 2, local_test_mode)
         logger.info("Step Described: {}".format(output))
 
 
