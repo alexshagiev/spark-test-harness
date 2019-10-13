@@ -78,8 +78,9 @@ def show_help():
 
 
 def main(argv):
-    config_file = './application.conf'
+
     try:
+        logger.info('Starting with: argv: {}'.format(argv))
         opts, args = getopt.getopt(argv[1:], "h", ["help", "config=", "output=", "default-fs="])
     except getopt.GetoptError:
         show_help()
@@ -87,6 +88,8 @@ def main(argv):
 
     default_fs = ''
     output = ''
+    config_file = './application.conf'
+
     for opt, arg in opts:
         if opt == ('-h', '--help'):
             show_help()
@@ -107,5 +110,6 @@ def main(argv):
         logger.info("Creating scenarios output:{}, conf:{}".format(output, conf))
         create_scenarios(output, conf)
 
-        if __name__ == "__main__":
-            main(sys.argv)
+
+if __name__ == "__main__":
+    main(sys.argv)
