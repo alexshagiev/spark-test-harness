@@ -126,12 +126,19 @@ def copy_jar_to_spot_cluster(jar_file_name_path: str, public_master_dns: str, lo
     return dest
 
 
-def run_spark_submit(cluster_id: str, spark_submit_jar: str, local_test_mode: bool) -> str:
-    cmd = 'aws emr add-steps --cluster-id ' + cluster_id + ' ' \
-                                                           '--steps Type=Spark,Name="test-harness",ActionOnFailure=CONTINUE,Args=[' + spark_submit_jar + ']'
+def add_step(cluster_id: str, spark_submit_jar: str, local_test_mode: bool) -> str:
+    cmd = 'cat ./tests/resources/aws/add-steps.json' if local_test_mode else \
+        'aws emr add-steps --cluster-id ' + cluster_id + ' ' \
+                                                         '--steps Type=Spark,Name="test-harness",ActionOnFailure=CONTINUE,Args=[' + spark_submit_jar + ']'
     logger.info('Remote command: {}'.format(cmd))
-    if local_test_mode:
-        return 'Mock run completed'
+    result = run([cmd], check=True, shell=True, universal_newlines=True, stdout=PIPE, stderr=PIPE)
+    return result.stdout
+
+
+def describe_step(cluster_id: str, step_id: str, attempt, local_test_mode: bool):
+    cmd = 'cat ./tests/resources/aws/describe-step-{}.json'.format(attempt) if local_test_mode else \
+        'aws emr describe-step --cluster-id "{}", --step "{}"'.format(cluster_id, step_id)
+    logger.debug("exec: {}".format(cmd))
     result = run([cmd], check=True, shell=True, universal_newlines=True, stdout=PIPE, stderr=PIPE)
     return result.stdout
 
@@ -212,17 +219,16 @@ def main(argv):
         generate_jsonl_data.main(
             [sys.argv[0], '--config', script_home + '/./../src/main/resources/application.conf', '--output', 'hdfs',
              '--default-fs', default_fs])
-        sys.exit(0)
 
     if spark_submit:
         logger.info("Submitting Spark Job into Cluster: {}".format(cluster_id))
         remote_uri_path = copy_jar_to_spot_cluster(spark_submit_jar, host_name, local_test_mode)
         remote_jar_path = 'file://' + remote_uri_path.split(':')[-1]
-        run_spark_submit(cluster_id, remote_jar_path, local_test_mode)
-
-
-# \
-# scp -i ~/aws-emr-key.pem ./target/spark-test-harness-1.0-SNAPSHOT.jar hadoop@ec2-18-223-111-193.us-east-2.compute.amazonaws.com
+        output = add_step(cluster_id, remote_jar_path, local_test_mode)
+        logger.info("Step Added: {}".format(output))
+        step_id = json.loads(output)['StepIds'][0]
+        output = describe_step(cluster_id, step_id, 1, local_test_mode)
+        logger.info("Step Described: {}".format(output))
 
 
 if __name__ == "__main__":
