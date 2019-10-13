@@ -217,7 +217,7 @@ def main(argv):
     if spark_submit:
         logger.info("Submitting Spark Job into Cluster: {}".format(cluster_id))
         remote_uri_path = copy_jar_to_spot_cluster(spark_submit_jar, host_name, local_test_mode)
-        remote_jar_path = 'file:/' + remote_uri_path.split(':')[-1]
+        remote_jar_path = 'file://' + remote_uri_path.split(':')[-1]
         run_spark_submit(cluster_id, remote_jar_path, local_test_mode)
 
 
