@@ -34,7 +34,7 @@ object Main extends EnvContext {
     val randomUUID = UUID.randomUUID().toString
     val currentDate = new Date(new java.util.Date().getTime)
     var resultDF: DataFrame = null
-    var baseDir = conf.getString(s"conf.hdfs.base-dir")
+    val baseDir = conf.getString(s"conf.hdfs.base-dir")
 
     for ((run_type, run_sizes) <- this.run_types_2_sizes) {
 
@@ -94,7 +94,7 @@ object Main extends EnvContext {
       }
 
     }
-    resultDF.coalesce(1).write.format("csv").option("header", "true").mode(SaveMode.Append).save(s"/${baseDir}/performance-stats.csv");
+    resultDF.coalesce(1).write.format("csv").option("header", "true").mode(SaveMode.Append).save(s"hdfs://${baseDir}/performance-stats.csv");
   }
 
 }

@@ -129,8 +129,8 @@ def copy_jar_to_spot_cluster(jar_file_name_path: str, public_master_dns: str, lo
 def run_spark_submit(cluster_id: str, spark_submit_jar: str, local_test_mode: bool) -> str:
     cmd = 'aws emr add-steps --cluster-id ' + cluster_id + ' ' \
                                                            '--steps Type=Spark,Name="test-harness",ActionOnFailure=CONTINUE,Args=[' + spark_submit_jar + ']'
+    logger.info('Remote command: {}'.format(cmd))
     if local_test_mode:
-        logger.info('Remote command: {}'.format(cmd))
         return 'Mock run completed'
     result = run([cmd], check=True, shell=True, universal_newlines=True, stdout=PIPE, stderr=PIPE)
     return result.stdout
