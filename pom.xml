@@ -168,7 +168,7 @@
                                 <argument>${project.basedir}/utils/generate_jsonl_data.py</argument>
                                 <argument>--config</argument>
                                 <argument>${project.build.sourceDirectory}/../resources/application.conf</argument>
-                                <argument>-o</argument>
+                                <argument>--output</argument>
                                 <argument>hdfs</argument>
                             </arguments>
                         </configuration>

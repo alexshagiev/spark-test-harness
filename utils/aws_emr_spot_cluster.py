@@ -115,6 +115,8 @@ def copy_jar_to_spot_cluster(jar_file_name: str, public_master_dns: str, local_t
         return dest
 
     result = run([cmd], check=True, shell=True, universal_newlines=True, stdout=PIPE, stderr=PIPE)
+    if not result.returncode == 0:
+        logger.error(result.stderr)
     return dest
 
 
@@ -205,7 +207,7 @@ def main(argv):
     if spark_submit:
         logger.info("Submitting Spark Job into Cluster: {}".format(cluster_id))
         remote_uri_path = copy_jar_to_spot_cluster(spark_submit_jar, host_name, local_test_mode)
-        remote_jar_path = 'file:/' + remote_uri_path.split(':')[-1]
+        remote_jar_path = 'file:/' + remote_uri_path.split(':')[-1] + '/' + spark_submit_jar
         run_spark_submit(cluster_id, remote_jar_path, local_test_mode)
 
 
