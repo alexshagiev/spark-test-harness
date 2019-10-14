@@ -269,7 +269,7 @@
 
 
 # Performance results
-## Single Host deployment without yarn
+## Single Host deployment with & without yarn as well as AWS EMR results
 * Observations:
   * It appears based on the local mac test that Yarn introduces very minimal scheduling overhead. Things do slow down on local yarn as compared to the spark internal 
   scheduler. However they are explained and proportional to the lost Vcore for processing since Yarn allocated a single Vcore to the applicaiton manager which run in the 
