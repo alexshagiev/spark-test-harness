@@ -162,7 +162,7 @@ def get_step_result_wait_till_completed(cluster_id: str, step_id: str, local_tes
                 sleep_interval_sec = 5
             p_bar.update(sleep_interval_sec)
 
-            if state('COMPLETED', 'FAILED'):
+            if state in ('COMPLETED', 'FAILED'):
                 logger.info('Step Details: {}'.format(result.replace('\n', '').replace('  ', '')))
                 return 'Finished running steps'
 
@@ -182,16 +182,16 @@ def running_local():
 def show_help():
     print('aws_emr_spot_cluster.py \
           \n\tcreates a default spot cluster, populates HDFS with random data, and spark-submit test-harness job')
-    print('aws_emr_spot_cluster.py --populate-hdfs=true --cluster j-2AXXXXXXGAPLF \
+    print('aws_emr_spot_cluster.py --populate-hdfs=true --cluster-id j-2AXXXXXXGAPLF \
           \n\tconnects to cluster id provided and populate its HDFS with scenario files')
-    print('aws_emr_spot_cluster.py --cluster j-2AXXXXXXGAPLF --spark-submit=true --spark-jar=./target/spark-test-harness-1.0-SNAPSHOT.jar \
+    print('aws_emr_spot_cluster.py --cluster-id j-2AXXXXXXGAPLF --spark-submit=true --spark-jar=./target/spark-test-harness-1.0-SNAPSHOT.jar \
           \n\tconnects to cluster id provided spark-submit test-harness job as jar')
 
 
 def main(argv):
     try:
         opts, args = getopt.getopt(argv[1:], "",
-                                   ["help", "populate-hdfs=", "cluster=", "core-nodes=", "spark-submit=", "spark-jar="])
+                                   ["help", "populate-hdfs=", "cluster-id=", "core-nodes=", "spark-submit=", "spark-jar="])
     except getopt.GetoptError as e:
         show_help()
         print(e)
@@ -216,7 +216,7 @@ def main(argv):
         if opt in "--help":
             show_help()
             sys.exit()
-        elif opt in "--cluster":
+        elif opt in "--cluster-id":
             cluster_id = arg
         elif opt in "--core-nodes":
             core_nodes = arg

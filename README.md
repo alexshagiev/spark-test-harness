@@ -214,7 +214,9 @@ AmazonElasticMapReduceFullAccess` role
  * ssh -i ~/aws-emr-key.pem hadoop@ec2-18-223-106-115.us-east-2.compute.amazonaws.com hdfs dfs -mkdir -p /user/test-harness - create test harness dir
  * grant rwx permissions to all files ssh -i ~/aws-emr-key.pem hadoop@ec2-18-223-106-115.us-east-2.compute.amazonaws.com hdfs dfs -chmod -R 777 /user/test-harness
  ****** mvn -DskipTests package exec:exec@run-test-aws-emr
- 
+    * python ./utils/aws_emr_spot_cluster.py --cluster-id j-SVOCZN4PM42X --populate-hdfs=true
+    * python ./utils/aws_emr_spot_cluster.py --cluster-id j-SVOCZN4PM42X --spark-submit=true --spark-jar ./target/spark-*.jar
+    
 # Load HDFS
   * `conda env create -f ./utils/conda.recipe/test-harness.yml`
   * you will need to run this command in the directory where you check out this test-harness project from [github.com]
