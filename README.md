@@ -213,7 +213,8 @@ AmazonElasticMapReduceFullAccess` role
  * TODO cluster needs to be created with a security group that allows connection from the t2.micro by adding port 8020 to the inbound rules of the `ElasticMapReduce-master` security group
  * ssh -i ~/aws-emr-key.pem hadoop@ec2-18-223-106-115.us-east-2.compute.amazonaws.com hdfs dfs -mkdir -p /user/test-harness - create test harness dir
  * grant rwx permissions to all files ssh -i ~/aws-emr-key.pem hadoop@ec2-18-223-106-115.us-east-2.compute.amazonaws.com hdfs dfs -chmod -R 777 /user/test-harness
-
+ ****** mvn -DskipTests package exec:exec@run-test-aws-emr
+ 
 # Load HDFS
   * `conda env create -f ./utils/conda.recipe/test-harness.yml`
   * you will need to run this command in the directory where you check out this test-harness project from [github.com]

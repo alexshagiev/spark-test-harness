@@ -184,14 +184,14 @@ def show_help():
           \n\tcreates a default spot cluster, populates HDFS with random data, and spark-submit test-harness job')
     print('aws_emr_spot_cluster.py --populate-hdfs=true --cluster j-2AXXXXXXGAPLF \
           \n\tconnects to cluster id provided and populate its HDFS with scenario files')
-    print('aws_emr_spot_cluster.py --cluster j-2AXXXXXXGAPLF --spark-submit ./target/spark-test-harness-1.0-SNAPSHOT.jar \
+    print('aws_emr_spot_cluster.py --cluster j-2AXXXXXXGAPLF --spark-submit=true --spark-jar=./target/spark-test-harness-1.0-SNAPSHOT.jar \
           \n\tconnects to cluster id provided spark-submit test-harness job as jar')
 
 
 def main(argv):
     try:
         opts, args = getopt.getopt(argv[1:], "",
-                                   ["help", "populate-hdfs=", "cluster=", "core-nodes=", "spark-submit="])
+                                   ["help", "populate-hdfs=", "cluster=", "core-nodes=", "spark-submit=", "spark-jar="])
     except getopt.GetoptError as e:
         show_help()
         print(e)
@@ -223,8 +223,9 @@ def main(argv):
         elif opt in "--populate-hdfs":
             populate_hdfs = str(arg).lower() in ['true', '1', 'yes']
         elif opt in "--spark-submit":
-            spark_submit_jar = arg
             spark_submit = True
+        elif opt in "--spark-jar":
+            spark_submit_jar = arg
 
     if (spark_submit or populate_hdfs) and cluster_id == '':
         show_help()
