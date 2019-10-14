@@ -183,13 +183,13 @@
     
 ## Configure `${T2_MICRO}`
   * Login to your Free Tier gateway `ssh -i ~/aws-emr-key.pem ${T2_MICRO}` 
-    * Perform the following steps to configure [AWS Command Line Interface (CLI)](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html)
     * Create `emr-create-id` Identity and `emr-create-group` group using [Identity Management (IAM)](https://console.aws.amazon.com/iam/home#/users$new?step=details)
       * Select `Programmatic Access` for `Access Type`
       * While creating `emr-create-group` group, ensure to attach `AmazonElasticMapReduceFullAccess` policy to it so that is able to manipulate EMR
       * __IMPORTANT__ - Save `Access Key` & `Secret Access Key` in the process, you __WON'T__ be able to retrieve it later 
     * Execute `aws configure` on ${T2_MICRO} node and assign `Access Key` with `Secret Access Key` from `emr-create-id` Identity
       * Assign `us-east-2` and `json` for region and output format respectively. 
+      * For more on CLI configuration review [AWS Command Line Interface (CLI)](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html)
       * __IMPORTANT__ - You must choose output format to be `json` for the utility scripts in the Test Harness to work 
     * Network Security Groups
       * Using [Security Groups](https://console.aws.amazon.com/vpc/home?region=us-east-2#SecurityGroups:sort=vpcId) UI ensure that you 
