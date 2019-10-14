@@ -162,15 +162,15 @@ def get_step_result_wait_till_completed(cluster_id: str, step_id: str, local_tes
                 sleep_interval_sec = 5
             p_bar.update(sleep_interval_sec)
 
-            if state == 'COMPLETED':
+            if state('COMPLETED', 'FAILED'):
                 logger.info('Step Details: {}'.format(result.replace('\n', '').replace('  ', '')))
-                return 'Completed'
+                return 'Finished running steps'
 
             time.sleep(sleep_interval_sec)
 
     raise Exception(
         'Step: {} did not reach State "COMPLETED" after timeout: {}min. Current State: {}'.format(cluster_id,
-                                                                                                   timeout, state))
+                                                                                                  timeout, state))
 
 
 def running_local():
