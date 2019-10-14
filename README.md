@@ -256,10 +256,9 @@
 
 # Performance results
 ## Single Host deployment without yarn
-* It appears that performance increases with number of cores but does not exactly double when doubling cores
-* Another observation is that it appears that most of the processing cost is JSON parsing, need to look at optimizing further
+* Observation is that it appears that most of the processing cost is JSON parsing, need to look at optimizing further
 Example: A file with 1m rows can be counted with out parsing in under 30 seconds however with parsing it takes longer than 10 minutes
-* Summary No Yarn: ![alt](./README.md.resources/performance-results.png)
+* Summary of the results: ![alt](./README.md.resources/performance-results.png)
 * Full Results can be found here [Google Sheet with results here](https://docs.google.com/spreadsheets/d/1rT22cXdM3pVAIEyy-oArSACXeq6O7MKxk-B1ycnBjFo/edit?usp=sharing)
   * for definition of scenarios refer to [application.conf#scenarios section](./src/main/resources/application.conf) 
 
