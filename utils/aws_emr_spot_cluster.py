@@ -209,7 +209,7 @@ def main(argv):
     spark_submit_jar = script_home + '/./../target/spark-test-harness-1.0-SNAPSHOT.jar'
     spark_submit = False
     cluster_id = ''
-    timeout = 15
+    timeout = 20
     core_nodes = 2
 
     for opt, arg in opts:

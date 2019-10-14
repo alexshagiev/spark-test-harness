@@ -154,14 +154,15 @@
   * [Free tier allowance](https://console.aws.amazon.com/billing/home#/freetier)
     
 ## Setting up Test Harness on EMR an AWS Spark Cluster
-  * Create a Free Tier `t2.micro` [Amazon Linux 2 AMI (HVM), SSD Volume Type](https://console.aws.amazon.com/ec2/v2/home?region=us-east-2#LaunchInstanceWizard:) using the wizard.
-    * This host will be referred to as ${T2_MICRO} in this document. It will be your gateway into AWS. You will deploy and run the test harness from this node.
-    * `t2.micro` instance, includes 1 CPU, 1G RAM, Transient [Elastic Brock Storage (EBS)](https://aws.amazon.com/ebs/)
   * [Create a key pair using EC2 console](https://console.aws.amazon.com/ec2/home?#KeyPairs) 
     * __IMPORTANT__ - they key name must be `aws-emr-key` as it is used in most util scripts in the projects
     * Save `aws-emr-key.pem` into your Mac's home directory and Copy it to the to `${T2_MICRO}:~/aws-emr-key.pem` location
           
   ![alt_text](README.md.resources/aws-ec2-key-creating.png)
+  * Create a Free Tier `t2.micro` [Amazon Linux 2 AMI (HVM), SSD Volume Type](https://console.aws.amazon.com/ec2/v2/home?region=us-east-2#LaunchInstanceWizard:) using the wizard.
+    * This host will be referred to as ${T2_MICRO} in this document. It will be your gateway into AWS. You will deploy and run the test harness from this node.
+    * `t2.micro` instance, includes 1 CPU, 1G RAM, Transient [Elastic Brock Storage (EBS)](https://aws.amazon.com/ebs/)
+
     
 ## Configure `${T2_MICRO}`
   * Login to your Free Tier gateway `ssh -i ~/aws-emr-key.pem ${T2_MICRO}` 
@@ -172,7 +173,10 @@
       * __IMPORTANT__ - Save `Access Key` & `Secret Access Key` in the process, you __WON'T__ be able to retrieve it later 
     * Execute `aws configure` on ${T2_MICRO} node and assign `Access Key` with `Secret Access Key` from `emr-create-id` Identity
       * Assign `us-east-2` and `json` for region and output format respectively. 
-      * __IMPORTANT__ - You must choose output format to be `json` for the utility scripts in the Test Harness to work  
+      * __IMPORTANT__ - You must choose output format to be `json` for the utility scripts in the Test Harness to work 
+    * Network Security Groups
+      * Using [Security Groups](https://console.aws.amazon.com/vpc/home?region=us-east-2#SecurityGroups:sort=vpcId) UI ensure that you 
+      add under `Inbound Rules` type `All TCP` port ranges `0-65535` Source `security group of ${T2_MICRO}` of the  `ElasticMapReduce-slave` & `ElasticMapReduce-master` Security groups
     * Run steps below to install tools used by Test harness
     ~~~shell script
     # install git
@@ -200,22 +204,17 @@
     rm -rf ./spark-test-harness
     git clone https://github.com/alexshagiev/spark-test-harness.git
     cd spark-test-harness
+    
+    # conda env create -f ./utils/conda.recipe/test-harness.yml -- fails with out of memory on free tier.
+    # hence the work around
+    conda create --yes --name test-harness python=3.6
+    conda activate test-harness
+    conda install --yes -c conda-forge pyhocon
+    conda install --yes -c conda-forge pyarrow
+    conda install --yes -c conda-forge hdfs3
+    conda install --yes -c conda-forge tqdm
     ~~~
 ## Run Test Harness on EMR
-  * Setup python env for utility scripts
-  ~~~shell script
-  # conda env create -f ./utils/conda.recipe/test-harness.yml -- fails with out of memory on free tier.
-  # hence the work around
-  conda create --yes --name test-harness python=3.6
-  conda activate test-harness
-  conda install --yes -c conda-forge pyhocon
-  conda install --yes -c conda-forge pyarrow
-  conda install --yes -c conda-forge hdfs3
-  conda install --yes -c conda-forge tqdm
-  ~~~
-  * Network Security Groups
-    * Using [Security Groups](https://console.aws.amazon.com/vpc/home?region=us-east-2#SecurityGroups:sort=vpcId) UI ensure that you 
-    add under `Inbound Rules` type `All TCP` port ranges `0-65535` Source `security group of ${T2_MICRO}` of the  `ElasticMapReduce-slave` & `ElasticMapReduce-master` Security groups
   * `mvn -DskipTests package exec:exec@run-test-aws-emr` - will create the cluster, populate it with data, and run Test Harness
     * modify value of `<argument>--core-nodes</argument>` of the `exec:exec@run-test-aws-emr` plugin to change number of COREs 
     nodes to be added to the fleet during instantiation. The default is set to 4 Nodes with each having 4vCores. Hence a total of 16 cores.
