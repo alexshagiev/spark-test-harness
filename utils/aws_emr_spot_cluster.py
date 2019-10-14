@@ -50,7 +50,7 @@ def describe_cluster(cluster_id: str, attempt: int, local_test_mode: bool) -> st
 def get_aws_emr_public_master_dns_name_on_waiting(cluster_id: str, timeout: int, local_test_mode: bool) -> str:
     attempt = 0
     state = ''
-    timeout_describe_addition = 10  # in seconds, to allow for aws to respond and not drop created cluster.
+    timeout_describe_addition = 60  # in seconds, to allow for aws to respond and not drop created cluster.
     t_end = time.time() + timeout * 60 + timeout_describe_addition
     with tqdm(total=timeout * 60 + timeout_describe_addition) as p_bar:
         while time.time() < t_end:
@@ -209,7 +209,7 @@ def main(argv):
     spark_submit_jar = script_home + '/./../target/spark-test-harness-1.0-SNAPSHOT.jar'
     spark_submit = False
     cluster_id = ''
-    timeout = 10
+    timeout = 15
     core_nodes = 2
 
     for opt, arg in opts:
