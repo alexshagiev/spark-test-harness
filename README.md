@@ -68,6 +68,9 @@
     ${HADOOP_HOME}/libexec/bin/hdfs dfs -mkdir -p /user/test-harness
     ${HADOOP_HOME}/libexec/sbin/start-yarn.sh
     ~~~
+    * __IMPORTANT__ you must see at least one data node running in the UI below if not, it is likely meant that you used
+    and existing hadoop install and you need to either reformat hdfs with the cluser id flag, id will be found in the
+    the failing data node log and/or remove all the files in the hdfs storage folder which in this example was defined as `~/hadoop-storage`
   * Above should start several services for which UI will be visible on the following default ports
     * __HDFS__ - [http://localhost:9870/]
     * __YARN__ - [http://localhost:8088/]
@@ -136,7 +139,7 @@
 1. `mvn -DskipTests package exec:exec@run-test-spark-master`
    * This command will create an UBER jar and submit it into the stand alone cluster, spark url as defined in [pom.xml's respective maven goal](pom.xml)
    * You can change this option `spark.cores.max` in the [pom.xml](pom.xml) to see how well the scenario scales with less or more cores. 
-   When missing a max `1024` cores will be used if available. Typically running this harness on a single host will result in 4 cores
+   When missing all cores will be used on your machine. On a Mac used in the results 4 cores were used by default.
 ### Submitting spark job using Yarn
 1. `mvn -DskipTests package exec:exec@run-test-yarn-master`
 
@@ -215,6 +218,7 @@
     conda install --yes -c conda-forge tqdm
     ~~~
 ## Run Test Harness on EMR
+  * __MUST__ activate correct conda env via `conda activate test-harness`
   * `mvn -DskipTests package exec:exec@run-test-aws-emr` - will create the cluster, populate it with data, and run Test Harness
     * modify value of `<argument>--core-nodes</argument>` of the `exec:exec@run-test-aws-emr` plugin to change number of COREs 
     nodes to be added to the fleet during instantiation. The default is set to 4 Nodes with each having 4vCores. Hence a total of 16 cores.
@@ -255,7 +259,7 @@
 * It appears that performance increases with number of cores but does not exactly double when doubling cores
 * Another observation is that it appears that most of the processing cost is JSON parsing, need to look at optimizing further
 Example: A file with 1m rows can be counted with out parsing in under 30 seconds however with parsing it takes longer than 10 minutes
-* Summary No Yarn: ![alt](./README.md.resources/performance-results-no-yarn.png)
+* Summary No Yarn: ![alt](./README.md.resources/performance-results.png)
 * Full Results can be found here [Google Sheet with results here](https://docs.google.com/spreadsheets/d/1rT22cXdM3pVAIEyy-oArSACXeq6O7MKxk-B1ycnBjFo/edit?usp=sharing)
   * for definition of scenarios refer to [application.conf#scenarios section](./src/main/resources/application.conf) 
 
