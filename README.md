@@ -270,8 +270,14 @@
 
 # Performance results
 ## Single Host deployment without yarn
-* Observation is that it appears that most of the processing cost is JSON parsing, need to look at optimizing further
-Example: A file with 1m rows can be counted with out parsing in under 30 seconds however with parsing it takes longer than 10 minutes
+* Observations:
+  * It appears based on the local mac test that Yarn introduces very minimal scheduling overhead. Things do slow down on local yarn as compared to the spark internal 
+  scheduler. However they are explained and proportional to the lost Vcore for processing since Yarn allocated a single Vcore to the applicaiton manager which run in the 
+  client mode.
+  * Also interestingly enough it is possible to achieve comparable performance between a Premium Mac hardware kit and solid drive vs AWS General purpose `m5.large` general
+  purpose hardware with magnetic disk
+  * It also seems that read and write take each roughly 15% & 15% of the overall processing time as compared 70% to parse Json. Json parsing is therefore naturally the area of optimization.
+
 * Summary of the results: ![alt](./README.md.resources/performance-results.png)
 * Full Results can be found here [Google Sheet with results here](https://docs.google.com/spreadsheets/d/1rT22cXdM3pVAIEyy-oArSACXeq6O7MKxk-B1ycnBjFo/edit?usp=sharing)
   * for definition of scenarios refer to [application.conf#scenarios section](./src/main/resources/application.conf) 
