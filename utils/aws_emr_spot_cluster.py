@@ -117,7 +117,7 @@ def copy_jar_to_spot_cluster(jar_file_name_path: str, public_master_dns: str, lo
     cmd = 'scp {} {} {} {}'.format(ssh_key_check_disable, ssh_pem_key, jar_file_name_path, dest)
     logger.info("exec: {}".format(cmd))
     if local_test_mode:
-        logger.info('Remote command: {}'.format(cmd))
+        logger.info('Mock exec: {}'.format(cmd))
         return dest
 
     result = run([cmd], check=True, shell=True, universal_newlines=True, stdout=PIPE, stderr=PIPE)
@@ -130,7 +130,7 @@ def add_step(cluster_id: str, spark_submit_jar: str, local_test_mode: bool) -> s
     cmd = 'cat ./tests/resources/aws/add-steps.json' if local_test_mode else \
         'aws emr add-steps --cluster-id ' + cluster_id + ' ' \
                                                          '--steps Type=Spark,Name="test-harness",ActionOnFailure=CONTINUE,Args=[' + spark_submit_jar + ']'
-    logger.info('Remote command: {}'.format(cmd))
+    logger.info('exec: {}'.format(cmd))
     result = run([cmd], check=True, shell=True, universal_newlines=True, stdout=PIPE, stderr=PIPE)
     return result.stdout
 

@@ -21,11 +21,6 @@
         <spark.version>2.4.3</spark.version>
         <scala.version>2.11.12</scala.version>
         <scala.compat.version>2.11</scala.compat.version>
-<!--    Toggle appropriate Config director between AWS and Local install -->
-        <hadoop.config.dir>/usr/local/Cellar/hadoop/3.1.2/libexec/etc/hadoop</hadoop.config.dir> <!-- Local hadoop/yarn config dir -->
-<!--        <hadoop.config.dir>/etc/hadoop/conf.empty</hadoop.config.dir> &lt;!&ndash; AWS EMR config dir &ndash;&gt;-->
-
-
     </properties>
 
     <dependencies>
@@ -174,16 +169,25 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <id>run-test-aws-emr</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>python</executable>
+                            <arguments>
+                                <argument>./utils/aws_emr_spot_cluster.py</argument>
+                                <argument>--cluster-nodes</argument><argument>4</argument>
+                                <argument>--spark-submit</argument><argument>${project.build.directory}/${project.artifactId}-${project.version}.jar</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>run-test-yarn-master</id>
                         <goals>
                             <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <environmentVariables>
-                                <HADOOP_CONF_DIR>
-                                    ${hadoop.config.dir}
-                                </HADOOP_CONF_DIR>
-                            </environmentVariables>
                             <executable>spark-submit</executable>
                             <arguments>
                                 <argument>--master</argument><argument>yarn</argument>
