@@ -177,8 +177,8 @@
                             <executable>python</executable>
                             <arguments>
                                 <argument>./utils/aws_emr_spot_cluster.py</argument>
-                                <argument>--cluster-nodes</argument><argument>4</argument>
-                                <argument>--spark-submit</argument><argument>${project.build.directory}/${project.artifactId}-${project.version}.jar</argument>
+                                <argument>--core-nodes</argument><argument>4</argument>
+                                <argument>--spark-jar</argument><argument>${project.build.directory}/${project.artifactId}-${project.version}.jar</argument>
                             </arguments>
                         </configuration>
                     </execution>
